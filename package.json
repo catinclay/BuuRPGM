@@ -7,7 +7,8 @@
     "build": "webpack",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "precommit": "lint-staged"
   },
   "dependencies": {
     "react": "^16.2.0",
@@ -33,9 +34,17 @@
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-prettier": "^2.5.0",
     "eslint-plugin-react": "^7.6.1",
+    "husky": "^0.14.3",
+    "lint-staged": "^6.1.0",
     "prettier": "1.10.2",
     "webpack": "^4.0.0-beta.0",
     "webpack-cli": "^2.0.4",
     "webpack-dev-server": "^3.0.0-alpha6"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
