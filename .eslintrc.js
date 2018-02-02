@@ -1,4 +1,5 @@
 module.exports = {
+  "parser": "babel-eslint",
   "plugins": [
     "prettier"
   ],
@@ -11,6 +12,13 @@ module.exports = {
     browser: true,
   },
   "rules": {
-    "prettier/prettier": "error"
+    "strict": 0,
+    "prettier/prettier": [
+      "error",
+      {
+        trailingComma: 'es5',
+        singleQuote: true,
+      },
+    ],
   },
 };

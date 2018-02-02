@@ -23,6 +23,7 @@
     "@babel/plugin-transform-react-inline-elements": "^7.0.0-beta.39",
     "@babel/preset-env": "^7.0.0-beta.39",
     "@babel/preset-react": "^7.0.0-beta.39",
+    "babel-eslint": "^8.2.1",
     "babel-loader": "^8.0.0-beta.0",
     "babel-plugin-transform-react-constant-elements": "^6.23.0",
     "babel-plugin-transform-react-inline-elements": "^6.22.0",
