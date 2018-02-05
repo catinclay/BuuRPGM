@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import 'todomvc-app-css/index.css';
 
@@ -19,6 +18,11 @@ export default class TodoApp extends Component {
     updateTodo: PropTypes.func.isRequired,
     addTodo: PropTypes.func.isRequired,
     clearCompleted: PropTypes.func.isRequired,
+    match: PropTypes.shape({
+      params: PropTypes.shape({
+        filter: PropTypes.string,
+      }).isRequired,
+    }).isRequired,
   };
 
   constructor(props) {
@@ -55,6 +59,7 @@ export default class TodoApp extends Component {
       deleteTodo,
       clearCompleted,
       toggleAll,
+      match: { params: { filter } },
     } = this.props;
 
     const activeTodoCount = todos.reduce(
@@ -64,45 +69,35 @@ export default class TodoApp extends Component {
     const completedCount = todos.length - activeTodoCount;
 
     return (
-      <Router>
-        <div className="todoapp">
-          <header className="header">
-            <h1>todos</h1>
-            <input
-              className="new-todo"
-              placeholder="What needs to be done?"
-              value={this.state.newTodo}
-              onKeyDown={this.handleNewTodoKeyDown}
-              onChange={this.handleChange}
-              autoFocus // eslint-disable-line jsx-a11y/no-autofocus
-            />
-          </header>
-          <Route
-            render={({ location }) => (
-              <TodoList
-                todos={todos}
-                toggle={toggleTodo}
-                destroy={deleteTodo}
-                save={updateTodo}
-                toggleAll={toggleAll}
-                location={location}
-              />
-            )}
+      <div className="todoapp">
+        <header className="header">
+          <h1>todos</h1>
+          <input
+            className="new-todo"
+            placeholder="What needs to be done?"
+            value={this.state.newTodo}
+            onKeyDown={this.handleNewTodoKeyDown}
+            onChange={this.handleChange}
+            autoFocus // eslint-disable-line jsx-a11y/no-autofocus
           />
-          <Route
-            render={({ location }) =>
-              activeTodoCount || completedCount ? (
-                <TodoFooter
-                  count={activeTodoCount}
-                  completedCount={completedCount}
-                  onClearCompleted={clearCompleted}
-                  location={location}
-                />
-              ) : null
-            }
+        </header>
+        <TodoList
+          todos={todos}
+          toggle={toggleTodo}
+          destroy={deleteTodo}
+          save={updateTodo}
+          toggleAll={toggleAll}
+          filter={filter}
+        />
+        {activeTodoCount || completedCount ? (
+          <TodoFooter
+            count={activeTodoCount}
+            completedCount={completedCount}
+            onClearCompleted={clearCompleted}
+            filter={filter}
           />
-        </div>
-      </Router>
+        ) : null}
+      </div>
     );
   }
 }

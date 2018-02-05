@@ -1,7 +1,6 @@
-const ROOT = '/';
-const COMPLETED = '/completed';
-const ACTIVE = '/active';
-export const route = { ROOT, COMPLETED, ACTIVE };
+const COMPLETED = 'completed';
+const ACTIVE = 'active';
+export const filter = { COMPLETED, ACTIVE };
 
 const ENTER = 13;
 const ESCAPE = 27;

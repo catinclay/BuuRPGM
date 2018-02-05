@@ -1,19 +1,20 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { route } from '../constants';
-
+import { filter as filterConstants } from '../constants';
 import TodoItem from './TodoItem';
 import * as SharedPropTypes from './sharedPropTypes';
+
+const { ACTIVE, COMPLETED } = filterConstants;
 
 export default class TodoList extends Component {
   static propTypes = {
     todos: PropTypes.arrayOf(SharedPropTypes.todo).isRequired,
-    location: SharedPropTypes.location.isRequired,
     toggle: PropTypes.func.isRequired,
     toggleAll: PropTypes.func.isRequired,
     destroy: PropTypes.func.isRequired,
     save: PropTypes.func.isRequired,
+    filter: PropTypes.string, // eslint-disable-line react/require-default-props
   };
 
   constructor(props) {
@@ -42,21 +43,20 @@ export default class TodoList extends Component {
   };
 
   render() {
-    const { todos, location: { pathname }, toggle, destroy } = this.props;
+    const { todos, filter, toggle, destroy } = this.props;
 
-    const shownTodos =
-      pathname === route.ROOT
-        ? todos
-        : todos.filter(todo => {
-            switch (pathname) {
-              case route.ACTIVE:
-                return todo.completed === false;
-              case route.COMPLETED:
-                return todo.completed === true;
-              default:
-                return false;
-            }
-          });
+    const shownTodos = filter
+      ? todos.filter(todo => {
+          switch (filter) {
+            case ACTIVE:
+              return todo.completed === false;
+            case COMPLETED:
+              return todo.completed === true;
+            default:
+              return false;
+          }
+        })
+      : todos;
 
     const todoItems = shownTodos.map(todo => (
       <TodoItem

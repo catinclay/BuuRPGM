@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 
 import { pluralize } from '../utils';
-import { route } from '../constants';
+import { filter as filterConstants } from '../constants';
 
-import * as SharedPropTypes from './sharedPropTypes';
+const { ACTIVE, COMPLETED } = filterConstants;
 
-const TodoFooter = ({ completedCount, onClearCompleted, location, count }) => {
+const TodoFooter = ({ completedCount, onClearCompleted, filter, count }) => {
   let clearButton = null;
 
   if (completedCount > 0) {
@@ -29,7 +29,7 @@ const TodoFooter = ({ completedCount, onClearCompleted, location, count }) => {
           <Link
             to="/"
             className={classNames({
-              selected: location.pathname === route.ROOT,
+              selected: !filter,
             })}
           >
             All
@@ -37,9 +37,9 @@ const TodoFooter = ({ completedCount, onClearCompleted, location, count }) => {
         </li>{' '}
         <li>
           <Link
-            to="/active"
+            to={`/${ACTIVE}`}
             className={classNames({
-              selected: location.pathname === route.ACTIVE,
+              selected: filter === ACTIVE,
             })}
           >
             Active
@@ -47,9 +47,9 @@ const TodoFooter = ({ completedCount, onClearCompleted, location, count }) => {
         </li>{' '}
         <li>
           <Link
-            to="/completed"
+            to={`/${COMPLETED}`}
             className={classNames({
-              selected: location.pathname === route.COMPLETED,
+              selected: filter === COMPLETED,
             })}
           >
             Completed
@@ -64,8 +64,8 @@ const TodoFooter = ({ completedCount, onClearCompleted, location, count }) => {
 TodoFooter.propTypes = {
   completedCount: PropTypes.number.isRequired,
   onClearCompleted: PropTypes.func.isRequired,
-  location: SharedPropTypes.location.isRequired, // eslint-disable-line react/no-typos
   count: PropTypes.number.isRequired,
+  filter: PropTypes.string, // eslint-disable-line react/require-default-props
 };
 
 export default TodoFooter;
