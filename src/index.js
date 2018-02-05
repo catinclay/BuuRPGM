@@ -1,3 +1,4 @@
+/* global __BASENAME__ */
 /* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -13,7 +14,7 @@ const store = createStore(reducer, applyMiddleware(logger));
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router>
+    <Router basname={__BASENAME__}>
       <Route path="/:filter?" component={Root} />
     </Router>
   </Provider>,
