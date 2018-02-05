@@ -38,18 +38,20 @@ export default class TodoItem extends Component {
   }
 
   handleSubmit = () => {
+    const { onDestroy, onSave, todo } = this.props;
     const val = this.state.editText.trim();
     if (val) {
-      this.props.onSave(val);
+      onSave(todo, val);
       this.setState({ editText: val });
     } else {
-      this.props.onDestroy();
+      onDestroy();
     }
   };
 
   handleEdit = () => {
-    this.props.onEdit();
-    this.setState({ editText: this.props.todo.title });
+    const { todo } = this.props;
+    this.props.onEdit(todo);
+    this.setState({ editText: todo.title });
   };
 
   handleKeyDown = event => {
@@ -72,8 +74,13 @@ export default class TodoItem extends Component {
     onToggle(todo, event.target.checked);
   };
 
+  handleDestroy = () => {
+    const { onDestroy, todo } = this.props;
+    onDestroy(todo);
+  };
+
   render() {
-    const { todo, editing, onDestroy } = this.props;
+    const { todo, editing } = this.props;
     return (
       <li
         className={classNames({
@@ -93,7 +100,7 @@ export default class TodoItem extends Component {
           >
             {todo.title}
           </label>
-          <button className="destroy" onClick={onDestroy} />
+          <button className="destroy" onClick={this.handleDestroy} />
         </div>
         <input
           ref={node => {
