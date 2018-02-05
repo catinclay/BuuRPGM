@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 
+import 'todomvc-app-css/index.css';
+
 import { key } from '../constants';
 
 import TodoFooter from './TodoFooter';
@@ -63,7 +65,7 @@ export default class TodoApp extends Component {
 
     return (
       <Router>
-        <div>
+        <div className="todoapp">
           <header className="header">
             <h1>todos</h1>
             <input

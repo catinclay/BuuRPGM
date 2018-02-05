@@ -22,7 +22,7 @@
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "shortid": "^2.2.8",
-    "todomvc-app-css": "^2.1.0"
+    "todomvc-app-css": "^2.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.39",
@@ -36,6 +36,7 @@
     "babel-plugin-transform-react-constant-elements": "^6.23.0",
     "babel-plugin-transform-react-inline-elements": "^6.22.0",
     "babel-preset-react": "^6.24.1",
+    "css-loader": "^0.28.9",
     "eslint": "^4.16.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-prettier": "^2.9.0",
@@ -46,6 +47,7 @@
     "husky": "^0.14.3",
     "lint-staged": "^6.1.0",
     "prettier": "1.10.2",
+    "style-loader": "^0.20.1",
     "webpack": "^4.0.0-beta.0",
     "webpack-cli": "^2.0.4",
     "webpack-dev-server": "^3.0.0-alpha6"
