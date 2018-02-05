@@ -14,7 +14,7 @@ const store = createStore(reducer, applyMiddleware(logger));
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router basname={__BASENAME__}>
+    <Router basename={__BASENAME__}>
       <Route path="/:filter?" component={Root} />
     </Router>
   </Provider>,
