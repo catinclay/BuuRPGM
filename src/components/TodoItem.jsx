@@ -9,11 +9,11 @@ export default class TodoItem extends Component {
   static propTypes = {
     todo: SharedPropTypes.todo.isRequired,
     editing: PropTypes.bool.isRequired,
-    onSave: PropTypes.func.isRequired,
-    onDestroy: PropTypes.func.isRequired,
     onEdit: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
-    onToggle: PropTypes.func.isRequired,
+    saveTodo: PropTypes.func.isRequired,
+    deleteTodo: PropTypes.func.isRequired,
+    toggleTodo: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -38,13 +38,13 @@ export default class TodoItem extends Component {
   }
 
   handleSubmit = () => {
-    const { onDestroy, onSave, todo } = this.props;
+    const { deleteTodo, saveTodo, todo } = this.props;
     const val = this.state.editText.trim();
     if (val) {
-      onSave(todo, val);
+      saveTodo(todo, val);
       this.setState({ editText: val });
     } else {
-      onDestroy();
+      deleteTodo();
     }
   };
 
@@ -70,13 +70,13 @@ export default class TodoItem extends Component {
   };
 
   handleToggle = event => {
-    const { onToggle, todo } = this.props;
-    onToggle(todo, event.target.checked);
+    const { toggleTodo, todo } = this.props;
+    toggleTodo(todo, event.target.checked);
   };
 
   handleDestroy = () => {
-    const { onDestroy, todo } = this.props;
-    onDestroy(todo);
+    const { deleteTodo, todo } = this.props;
+    deleteTodo(todo);
   };
 
   render() {

@@ -83,9 +83,9 @@ export default class TodoApp extends Component {
         </header>
         <TodoList
           todos={todos}
-          toggle={toggleTodo}
-          destroy={deleteTodo}
-          save={updateTodo}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+          updateTodo={updateTodo}
           toggleAll={toggleAll}
           filter={filter}
         />
@@ -93,7 +93,7 @@ export default class TodoApp extends Component {
           <TodoFooter
             count={activeTodoCount}
             completedCount={completedCount}
-            onClearCompleted={clearCompleted}
+            clearCompleted={clearCompleted}
             filter={filter}
           />
         ) : null}

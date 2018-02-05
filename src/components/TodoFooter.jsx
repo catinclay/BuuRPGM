@@ -8,12 +8,12 @@ import { filter as filterConstants } from '../constants';
 
 const { ACTIVE, COMPLETED } = filterConstants;
 
-const TodoFooter = ({ completedCount, onClearCompleted, filter, count }) => {
+const TodoFooter = ({ completedCount, clearCompleted, filter, count }) => {
   let clearButton = null;
 
   if (completedCount > 0) {
     clearButton = (
-      <button className="clear-completed" onClick={onClearCompleted}>
+      <button className="clear-completed" onClick={clearCompleted}>
         Clear completed
       </button>
     );
@@ -63,7 +63,7 @@ const TodoFooter = ({ completedCount, onClearCompleted, filter, count }) => {
 
 TodoFooter.propTypes = {
   completedCount: PropTypes.number.isRequired,
-  onClearCompleted: PropTypes.func.isRequired,
+  clearCompleted: PropTypes.func.isRequired,
   count: PropTypes.number.isRequired,
   filter: PropTypes.string, // eslint-disable-line react/require-default-props
 };

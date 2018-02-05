@@ -10,10 +10,10 @@ const { ACTIVE, COMPLETED } = filterConstants;
 export default class TodoList extends Component {
   static propTypes = {
     todos: PropTypes.arrayOf(SharedPropTypes.todo).isRequired,
-    toggle: PropTypes.func.isRequired,
+    toggleTodo: PropTypes.func.isRequired,
     toggleAll: PropTypes.func.isRequired,
-    destroy: PropTypes.func.isRequired,
-    save: PropTypes.func.isRequired,
+    deleteTodo: PropTypes.func.isRequired,
+    updateTodo: PropTypes.func.isRequired,
     filter: PropTypes.string, // eslint-disable-line react/require-default-props
   };
 
@@ -24,18 +24,18 @@ export default class TodoList extends Component {
     };
   }
 
-  edit = todo => {
+  onEditTodo = todo => {
     this.setState({ editing: todo.id });
   };
 
-  save = (todoToSave, text) => {
-    this.props.save(todoToSave, text);
+  onCancelEditTodo = () => {
     this.setState({ editing: null });
   };
 
-  cancel() {
+  saveTodo = (todoToSave, text) => {
+    this.props.updateTodo(todoToSave, text);
     this.setState({ editing: null });
-  }
+  };
 
   handleToggleAll = event => {
     const completed = event.target.checked;
@@ -43,7 +43,7 @@ export default class TodoList extends Component {
   };
 
   render() {
-    const { todos, filter, toggle, destroy } = this.props;
+    const { todos, filter, toggleTodo, deleteTodo } = this.props;
 
     const shownTodos = filter
       ? todos.filter(todo => {
@@ -62,12 +62,12 @@ export default class TodoList extends Component {
       <TodoItem
         key={todo.id}
         todo={todo}
-        onToggle={toggle}
-        onDestroy={destroy}
-        onEdit={this.edit}
+        toggleTodo={toggleTodo}
+        deleteTodo={deleteTodo}
+        saveTodo={this.saveTodo}
         editing={this.state.editing === todo.id}
-        onSave={this.save}
-        onCancel={this.cancel}
+        onEdit={this.onEditTodo}
+        onCancel={this.onCancelEditTodo}
       />
     ));
 
