@@ -11,9 +11,17 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.39",
+    "classnames": "^2.2.5",
+    "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-redux": "^5.0.6",
+    "react-router-dom": "^4.2.2",
+    "reduce-reducers": "^0.1.2",
     "redux": "^3.7.2",
+    "redux-logger": "^3.0.6",
+    "shortid": "^2.2.8",
     "todomvc-app-css": "^2.1.0"
   },
   "devDependencies": {

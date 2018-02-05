@@ -13,12 +13,14 @@ module.exports = {
   },
   "rules": {
     "strict": 0,
-    "prettier/prettier": [
-      "error",
-      {
-        trailingComma: 'es5',
-        singleQuote: true,
-      },
-    ],
+    "prettier/prettier": ["error", {
+      trailingComma: 'es5',
+      singleQuote: true,
+    }],
+    "jsx-a11y/anchor-is-valid": ["error", {
+      "components": [ "Link" ],
+      "specialLink": [ "to", "hrefLeft", "hrefRight" ],
+      "aspects": [ "noHref", "invalidHref", "preferButton" ],
+    }],
   },
 };
