@@ -4,7 +4,7 @@
   "description": "just todo",
   "main": "index.js",
   "scripts": {
-    "build": "NODE_ENV=production webpack && cp -f index.html dist/",
+    "build": "NODE_ENV=production webpack && cp -f -r index.html assets/ dist/",
     "lint": "eslint . --ext .js --ext .jsx",
     "lint:fix": "npm run lint -- --fix",
     "dev": "webpack-dev-server",
