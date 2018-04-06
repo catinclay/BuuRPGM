@@ -1,22 +1,21 @@
-/* global __BASENAME__ */
-/* eslint-disable react/jsx-filename-extension */
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
-import logger from 'redux-logger';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import * as PIXI from 'pixi.js';
 
-import reducer from './reducers';
-import Root from './rootContainer';
+const app = new PIXI.Application(800, 600, { backgroundColor: 0x1099bb });
+document.body.appendChild(app.view);
+const bunny = PIXI.Sprite.fromImage('assets/link.png');
+// center the sprite's anchor point
+bunny.anchor.set(0.5);
 
-const store = createStore(reducer, applyMiddleware(logger));
+// move the sprite to the center of the screen
+bunny.x = app.screen.width / 2;
+bunny.y = app.screen.height / 2;
 
-ReactDOM.render(
-  <Provider store={store}>
-    <Router basename={__BASENAME__}>
-      <Route path="/:filter?" component={Root} />
-    </Router>
-  </Provider>,
-  document.getElementById('root')
-);
+app.stage.addChild(bunny);
+
+// Listen for animate update
+app.ticker.add(delta => {
+  // just for fun, let's rotate mr rabbit a little
+  // delta is 1 if running at 100% performance
+  // creates frame-independent transformation
+  bunny.rotation += 0.1 * delta;
+});
