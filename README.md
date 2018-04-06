@@ -13,4 +13,3 @@
 pass linter before push
 
 `npm run lint`
-# BuuRPGM
