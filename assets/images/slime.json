@@ -1,0 +1,17 @@
+{
+  "frames":{
+    "slime_face_down_0.png":{
+      "frame":{"x":0,"y":0,"w":18,"h":18},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":18,"h":18}, 
+      "sourceSize":{"w":18,"h":18}
+    }
+  },
+  "meta":{
+    "app":"",
+    "version":"1.0",
+    "image":"slime.png",
+    "format":"RGBA8888",
+    "size":{"w":192,"h":256}}
+}
