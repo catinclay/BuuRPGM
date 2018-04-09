@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
-import { Hero } from './components/hero';
+import Hero from './components/hero';
 
 const { Application } = PIXI;
-const { Loader } = PIXI;
+const { loader } = PIXI;
 
 const app = new Application({
   width: 800,
@@ -54,4 +54,4 @@ function setup() {
   });
 }
 
-Loader.add(['assets/images/link.json', 'assets/images/slime.json']).load(setup);
+loader.add(['assets/images/link.json', 'assets/images/slime.json']).load(setup);
