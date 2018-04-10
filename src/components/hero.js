@@ -41,23 +41,23 @@ export default class Hero {
 
     const rx = dx / dist;
     const ry = dy / dist;
-    this.x += this.speed * rx;
-    this.y += this.speed * ry;
+    this.x += this.speed * rx * delta;
+    this.y += this.speed * ry * delta;
     if (Math.abs(dx) > Math.abs(dy)) {
       if (dx > 0) {
         this.dir = CONSTANTS.DIRECTION.RIGHT;
-      } else {
+      } else if (dx < 0) {
         this.dir = CONSTANTS.DIRECTION.LEFT;
       }
     } else if (dy > 0) {
       this.dir = CONSTANTS.DIRECTION.DOWN;
-    } else {
+    } else if (dy < 0) {
       this.dir = CONSTANTS.DIRECTION.UP;
     }
   }
 
   update(delta) {
-    this.goToTarget();
+    this.goToTarget(delta);
     this.stepCounter += delta;
     if (this.stepCounter >= 10) {
       this.stepCounter = 0;

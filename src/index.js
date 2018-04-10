@@ -28,8 +28,8 @@ function setupHero() {
 
 function mousedown(e) {
   hero.setTarget({
-    x: e.data.global.x,
-    y: e.data.global.y,
+    x: parseInt(e.data.global.x, 10),
+    y: parseInt(e.data.global.y, 10),
   });
 }
 
