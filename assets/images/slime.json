@@ -1,7 +1,14 @@
 {
   "frames":{
     "slime_face_down_0.png":{
-      "frame":{"x":0,"y":0,"w":18,"h":18},
+      "frame":{"x":7,"y":41,"w":18,"h":18},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":18,"h":18}, 
+      "sourceSize":{"w":18,"h":18}
+    },
+    "slime_face_down_1.png":{
+      "frame":{"x":71,"y":41,"w":18,"h":18},
       "rotated":false,
       "trimmed":false,
       "spriteSourceSize":{"x":0,"y":0,"w":18,"h":18}, 
