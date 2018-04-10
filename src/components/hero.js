@@ -1,10 +1,10 @@
 import * as PIXI from 'pixi.js';
+import CONSTANTS from '../constants';
 
 export default class Hero {
   constructor(args) {
     // Static util
     this.dirmap = ['down', 'left', 'up', 'right'];
-
     // Setup
     this.x = args.x;
     this.y = args.y;
@@ -25,21 +25,34 @@ export default class Hero {
     this.target.y = args.y;
   }
 
-  goToTarget() {
+  goToTarget(delta) {
     const dx = this.target.x - this.x;
     const dy = this.target.y - this.y;
-    if (dx > 1) {
-      this.dir = 3; // right
-      this.x += this.speed;
-    } else if (dx < -1) {
-      this.dir = 1; // left
-      this.x -= this.speed;
-    } else if (dy > 1) {
-      this.dir = 0; // down
-      this.y += this.speed;
-    } else if (dy < -1) {
-      this.dir = 2; // up
-      this.y -= this.speed;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist === 0) {
+      return;
+    }
+
+    if (dist < this.speed * delta) {
+      this.x = this.target.x;
+      this.y = this.target.y;
+      return;
+    }
+
+    const rx = dx / dist;
+    const ry = dy / dist;
+    this.x += this.speed * rx;
+    this.y += this.speed * ry;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0) {
+        this.dir = CONSTANTS.DIRECTION.RIGHT;
+      } else {
+        this.dir = CONSTANTS.DIRECTION.LEFT;
+      }
+    } else if (dy > 0) {
+      this.dir = CONSTANTS.DIRECTION.DOWN;
+    } else {
+      this.dir = CONSTANTS.DIRECTION.UP;
     }
   }
 

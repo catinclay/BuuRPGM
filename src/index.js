@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import Hero from './components/hero';
+import CONSTANTS from './constants';
 
 const { Application } = PIXI;
 const { loader } = PIXI;
@@ -19,7 +20,7 @@ function setupHero() {
   hero = new Hero({
     x: app.screen.width / 2,
     y: app.screen.height / 2,
-    dir: 0, // down
+    dir: CONSTANTS.DIRECTION.DOWN, // down
     textures: PIXI.loader.resources['assets/images/link.json'].textures,
   });
   app.stage.addChild(hero.sprite);
