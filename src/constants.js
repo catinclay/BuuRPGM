@@ -9,14 +9,14 @@ const HERO_STATUS = {
   ATTACKING: 1,
 };
 
-const MONSTER_NAME = {
-  SLIME: 'slime',
+const BATTLE_CONSTANTS = {
+  ARMOR_BASE: 100,
 };
 
 //
 const release = {
   DIRECTION: Object.freeze(DIRECTION),
   HERO_STATUS: Object.freeze(HERO_STATUS),
-  MONSTER_NAME: Object.freeze(MONSTER_NAME),
+  BATTLE_CONSTANTS: Object.freeze(BATTLE_CONSTANTS),
 };
 export default Object.freeze(release);

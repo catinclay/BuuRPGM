@@ -5,6 +5,7 @@ import CONSTANTS from './constants';
 
 const { Application } = PIXI;
 const { loader } = PIXI;
+const { Container } = PIXI;
 
 const app = new Application({
   width: 800,
@@ -13,6 +14,8 @@ const app = new Application({
   transparent: false,
   resolution: 1,
 });
+
+const battleGround = new Container();
 
 let hero;
 const monsters = [];
@@ -61,7 +64,7 @@ function setupMonster() {
   );
 
   for (let i = monsters.length - 1; i >= 0; i -= 1) {
-    app.stage.addChild(monsters[i].sprite);
+    battleGround.addChild(monsters[i].container);
   }
 }
 
@@ -73,30 +76,37 @@ function mousedown(e) {
 }
 
 function setupStage() {
+  app.stage.addChild(battleGround);
   const background = new PIXI.Graphics();
   background.beginFill(0x1099bb);
   background.drawRect(0, 0, app.screen.width, app.screen.height);
   background.endFill();
-  app.stage.addChild(background);
-  app.stage.interactive = true;
-  app.stage.on('pointerdown', mousedown);
+  battleGround.addChild(background);
+  battleGround.interactive = true;
+  battleGround.on('pointerdown', mousedown);
 }
 
 function gameLoop(delta) {
   hero.update(delta);
   for (let i = monsters.length - 1; i >= 0; i -= 1) {
     monsters[i].update(delta);
+    if (!monsters[i].alive) {
+      battleGround.removeChild(monsters[i].container);
+      monsters.splice(i, 1);
+    }
   }
 }
 
-function setup() {
+function setupGame() {
   setupStage();
   setupHero();
   setupMonster();
-  app.stage.addChild(hero.sprite);
+  battleGround.addChild(hero.sprite);
   app.ticker.add(delta => {
     gameLoop(delta);
   });
 }
 
-loader.add(['assets/images/slime.json', 'assets/images/link.json']).load(setup);
+loader
+  .add(['assets/images/slime.json', 'assets/images/link.json'])
+  .load(setupGame);

@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
+import Effect from './effect';
 import getDist from '../utils';
 
 export default class Hero {
@@ -20,6 +21,7 @@ export default class Hero {
     this.nowAttackFrame = 0;
     this.nowAttackTiming = 0;
     this.attackDuration = 60; // 1 sec per attack
+    this.attackDamage = 15;
   }
 
   onClickGround(args) {
@@ -76,6 +78,13 @@ export default class Hero {
   }
 
   attackMonster(delta) {
+    if (!this.targetMonster.alive) {
+      this.targetMonster = undefined;
+      this.target.x = this.x;
+      this.target.y = this.y;
+      return;
+    }
+    this.targetMonster.isShowingHp = true;
     this.faceToTarget(this.targetMonster);
     this.nowAttackTiming += delta;
     if (this.nowAttackTiming < this.attackDuration * 0.4) {
@@ -83,6 +92,11 @@ export default class Hero {
     } else if (this.nowAttackTiming < this.attackDuration * 0.7) {
       this.nowAttackFrame = 1;
     } else {
+      if (this.nowAttackFrame === 1) {
+        this.targetMonster.effects.push(
+          new Effect({ damage: this.attackDamage })
+        );
+      }
       this.nowAttackFrame = 2;
     }
     if (this.nowAttackTiming >= this.attackDuration) {
