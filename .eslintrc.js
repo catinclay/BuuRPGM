@@ -22,5 +22,6 @@ module.exports = {
       "specialLink": [ "to", "hrefLeft", "hrefRight" ],
       "aspects": [ "noHref", "invalidHref", "preferButton" ],
     }],
+    "no-param-reassign": [2, { "props": false }],
   },
 };
