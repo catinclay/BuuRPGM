@@ -1,7 +1,10 @@
 const SLIME = {
   NAME: 'slime',
   MAXHP: 50,
-  ATKSPD: 90,
+  BATK: 6,
+  FATK: 6,
+  ATKDUR: 90,
+  ATKRANGE: 30,
   MVSPD: 1,
   ARMOR: 0,
 };

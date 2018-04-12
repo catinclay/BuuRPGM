@@ -1,7 +1,9 @@
 import * as PIXI from 'pixi.js';
 import Hero from './components/hero';
+import StatusDashboard from './components/statusDashboard';
 import Slime from './components/slime';
 import CONSTANTS from './constants';
+import ProgressBar from './progressBar';
 
 const { Application } = PIXI;
 const { loader } = PIXI;
@@ -15,16 +17,17 @@ const app = new Application({
   resolution: 1,
 });
 
+const battleGroundHeight = 500;
 const battleGround = new Container();
-
+let statusDashboard;
 let hero;
 const monsters = [];
 document.body.appendChild(app.view);
 
 function setupHero() {
   hero = new Hero({
-    x: app.screen.width / 2,
-    y: app.screen.height / 2,
+    x: 400,
+    y: battleGroundHeight / 2,
     dir: CONSTANTS.DIRECTION.DOWN, // down
   });
 }
@@ -33,7 +36,7 @@ function setupMonster() {
   monsters.push(
     new Slime({
       x: 200,
-      y: 200,
+      y: 175,
       dir: CONSTANTS.DIRECTION.DOWN,
       hero,
     })
@@ -41,7 +44,7 @@ function setupMonster() {
   monsters.push(
     new Slime({
       x: 600,
-      y: 200,
+      y: 175,
       dir: CONSTANTS.DIRECTION.DOWN,
       hero,
     })
@@ -49,7 +52,7 @@ function setupMonster() {
   monsters.push(
     new Slime({
       x: 200,
-      y: 400,
+      y: 350,
       dir: CONSTANTS.DIRECTION.DOWN,
       hero,
     })
@@ -57,7 +60,7 @@ function setupMonster() {
   monsters.push(
     new Slime({
       x: 600,
-      y: 400,
+      y: 350,
       dir: CONSTANTS.DIRECTION.DOWN,
       hero,
     })
@@ -75,15 +78,26 @@ function mousedown(e) {
   });
 }
 
-function setupStage() {
+function setupBattleGround() {
   app.stage.addChild(battleGround);
   const background = new PIXI.Graphics();
   background.beginFill(0x1099bb);
-  background.drawRect(0, 0, app.screen.width, app.screen.height);
+  background.drawRect(0, 0, app.screen.width, battleGroundHeight);
   background.endFill();
   battleGround.addChild(background);
   battleGround.interactive = true;
   battleGround.on('pointerdown', mousedown);
+}
+
+function setupStatusDashboard() {
+  statusDashboard = new StatusDashboard({
+    x: 0,
+    y: battleGroundHeight,
+    width: app.screen.width,
+    height: app.screen.height - battleGroundHeight,
+    hero,
+  });
+  battleGround.addChild(statusDashboard.container);
 }
 
 function gameLoop(delta) {
@@ -95,17 +109,21 @@ function gameLoop(delta) {
       monsters.splice(i, 1);
     }
   }
+  statusDashboard.update();
 }
 
 function setupGame() {
-  setupStage();
+  setupBattleGround();
   setupHero();
+  setupStatusDashboard();
   setupMonster();
   battleGround.addChild(hero.sprite);
   app.ticker.add(delta => {
     gameLoop(delta);
   });
 }
+
+ProgressBar.barAsync(loader, app.stage);
 
 loader
   .add(['assets/images/slime.json', 'assets/images/link.json'])

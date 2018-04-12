@@ -4,6 +4,12 @@ const DIRECTION = {
   DOWN: 'down',
   UP: 'up',
 };
+
+const MONSTER_STATUS = {
+  WALKING: 0,
+  ATTACKING: 1,
+};
+
 const HERO_STATUS = {
   WALKING: 0,
   ATTACKING: 1,
@@ -16,6 +22,7 @@ const BATTLE_CONSTANTS = {
 //
 const release = {
   DIRECTION: Object.freeze(DIRECTION),
+  MONSTER_STATUS: Object.freeze(MONSTER_STATUS),
   HERO_STATUS: Object.freeze(HERO_STATUS),
   BATTLE_CONSTANTS: Object.freeze(BATTLE_CONSTANTS),
 };

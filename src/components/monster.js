@@ -20,6 +20,7 @@ export default class Monster {
 
     this.x = args.x;
     this.y = args.y;
+    this.target = { x: this.x, y: this.y };
     this.dir = args.dir;
     this.hero = args.hero;
     this.monsterName = '';
@@ -39,6 +40,22 @@ export default class Monster {
   onMouseClick(e) {
     e.stopPropagation();
     this.hero.targetMonster = this;
+  }
+
+  calculateEffects() {
+    for (let i = 0; i < this.effects.length; i += 1) {
+      this.effects[i].onEffect(this);
+      this.isShowingHp = true;
+    }
+    this.effects = [];
+  }
+
+  checkAlive() {
+    if (this.hp <= 0) {
+      this.alive = false;
+      this.isShowingHp = false;
+      this.destructor();
+    }
   }
 
   updateHp() {

@@ -1,7 +1,12 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
 import Effect from './effect';
-import getDist from '../utils';
+import {
+  getDistUtil,
+  goToTargetUtil,
+  faceToTargetUtil,
+  getRandomIntUtil,
+} from '../utils';
 
 export default class Hero {
   constructor(args) {
@@ -17,11 +22,17 @@ export default class Hero {
     this.target = { x: this.x, y: this.y };
     this.moveSpeed = 2;
     this.attackRange = 30;
-    this.stats = CONSTANTS.HERO_STATUS.WALKING;
+    this.status = CONSTANTS.HERO_STATUS.WALKING;
     this.nowAttackFrame = 0;
     this.nowAttackTiming = 0;
     this.attackDuration = 60; // 1 sec per attack
-    this.attackDamage = 15;
+    this.batk = 8;
+    this.fatk = 8;
+    this.alive = true;
+    this.effects = [];
+    this.maxHp = 100;
+    this.hp = this.maxHp;
+    this.armor = 0;
   }
 
   onClickGround(args) {
@@ -29,22 +40,6 @@ export default class Hero {
     this.target.y = args.y;
     this.targetMonster = undefined;
     this.status = CONSTANTS.HERO_STATUS.WALKING;
-  }
-
-  faceToTarget(target) {
-    const dx = target.x - this.x;
-    const dy = target.y - this.y;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      if (dx > 0) {
-        this.dir = CONSTANTS.DIRECTION.RIGHT;
-      } else if (dx < 0) {
-        this.dir = CONSTANTS.DIRECTION.LEFT;
-      }
-    } else if (dy > 0) {
-      this.dir = CONSTANTS.DIRECTION.DOWN;
-    } else if (dy < 0) {
-      this.dir = CONSTANTS.DIRECTION.UP;
-    }
   }
 
   goToTarget(delta) {
@@ -57,24 +52,9 @@ export default class Hero {
       this.nowStepFrame = this.nowStepFrame === 0 ? 1 : 0;
     }
 
-    const dx = this.target.x - this.x;
-    const dy = this.target.y - this.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist === 0) {
-      return;
-    }
+    goToTargetUtil(this, this.target, this.moveSpeed * delta);
 
-    if (dist < this.moveSpeed * delta) {
-      this.x = this.target.x;
-      this.y = this.target.y;
-      return;
-    }
-
-    this.faceToTarget(this.target);
-    const rx = dx / dist;
-    const ry = dy / dist;
-    this.x += this.moveSpeed * rx * delta;
-    this.y += this.moveSpeed * ry * delta;
+    faceToTargetUtil(this, this.target);
   }
 
   attackMonster(delta) {
@@ -85,7 +65,7 @@ export default class Hero {
       return;
     }
     this.targetMonster.isShowingHp = true;
-    this.faceToTarget(this.targetMonster);
+    faceToTargetUtil(this, this.targetMonster);
     this.nowAttackTiming += delta;
     if (this.nowAttackTiming < this.attackDuration * 0.4) {
       this.nowAttackFrame = 0;
@@ -94,7 +74,11 @@ export default class Hero {
     } else {
       if (this.nowAttackFrame === 1) {
         this.targetMonster.effects.push(
-          new Effect({ damage: this.attackDamage })
+          new Effect({
+            sender: this,
+            damage: this.batk + getRandomIntUtil(this.fatk),
+            aggro: true,
+          })
         );
       }
       this.nowAttackFrame = 2;
@@ -104,20 +88,39 @@ export default class Hero {
     }
   }
 
+  calculateEffects() {
+    for (let i = 0; i < this.effects.length; i += 1) {
+      this.effects[i].onEffect(this);
+    }
+    this.effects = [];
+  }
+
+  checkAlive() {
+    if (this.hp <= 0) {
+      this.alive = false;
+      this.sprite.texture = this.textures[`link_dead.png`];
+      this.sprite.x = this.x - this.sprite.width / 2;
+      this.sprite.y = this.y - this.sprite.height / 2;
+    }
+  }
+
   update(delta) {
+    this.calculateEffects();
+    this.checkAlive();
+    if (!this.alive) {
+      return;
+    }
+
     if (this.targetMonster === undefined) {
       this.status = CONSTANTS.HERO_STATUS.WALKING;
     } else if (
       this.targetMonster !== undefined &&
-      getDist(this, this.targetMonster) > this.attackRange
+      getDistUtil(this, this.targetMonster) > this.attackRange
     ) {
       this.status = CONSTANTS.HERO_STATUS.WALKING;
       this.target.x = this.targetMonster.x;
       this.target.y = this.targetMonster.y;
-    } else if (
-      this.targetMonster !== undefined &&
-      getDist(this, this.targetMonster) <= this.attackRange
-    ) {
+    } else {
       this.status = CONSTANTS.HERO_STATUS.ATTACKING;
     }
 
@@ -134,7 +137,7 @@ export default class Hero {
 
   updateImage() {
     switch (this.status) {
-      case CONSTANTS.HERO_STATUS.ATTACKING:
+      case CONSTANTS.HERO_STATUS.ATTACKING: {
         this.sprite.texture = this.textures[
           `link_attack_${this.dir}_${this.nowAttackFrame}.png`
         ];
@@ -157,6 +160,7 @@ export default class Hero {
           this.sprite.y = this.y - this.sprite.height / 2;
         }
         break;
+      }
       case CONSTANTS.HERO_STATUS.WALKING:
       default:
         this.sprite.texture = this.textures[
