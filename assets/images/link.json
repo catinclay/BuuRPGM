@@ -140,6 +140,13 @@
       "trimmed":false,
       "spriteSourceSize":{"x":0,"y":0,"w":64,"h":32},
       "sourceSize":{"w":64,"h":32}
+    },
+    "link_dead.png":{
+      "frame":{"x":60,"y":300,"w":32,"h":32},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":32,"h":32},
+      "sourceSize":{"w":32,"h":32}
     }
   },
   "meta":{
