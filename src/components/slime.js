@@ -17,6 +17,8 @@ export default class Slime extends Monster {
     this.jumpCounter = 0;
     this.nowJump = 0;
     this.textures = PIXI.loader.resources['assets/images/slime.json'].textures;
+    this.sprite.scale.x = 1.5;
+    this.sprite.scale.y = 1.5;
 
     this.monsterName = MONSTER_PROFILES.SLIME.NAME;
     this.maxHp = MONSTER_PROFILES.SLIME.MAXHP;
@@ -27,6 +29,7 @@ export default class Slime extends Monster {
     this.fatk = MONSTER_PROFILES.SLIME.FATK;
     this.moveSpeed = MONSTER_PROFILES.SLIME.MVSPD;
     this.armor = MONSTER_PROFILES.SLIME.ARMOR;
+    this.aggroRange = MONSTER_PROFILES.SLIME.AGGRORANGE;
 
     this.status = CONSTANTS.MONSTER_STATUS.WALKING;
     this.nowAttackTiming = 0;
@@ -72,6 +75,9 @@ export default class Slime extends Monster {
     }
     if (this.aggro === false || this.targetObject === undefined) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
+    } else if (getDistUtil(this, this.targetObject) > this.aggroRange) {
+      this.status = CONSTANTS.MONSTER_STATUS.WALKING;
+      this.aggro = false;
     } else if (getDistUtil(this, this.targetObject) > this.attackRange) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
       goToTargetUtil(this, this.targetObject, this.moveSpeed * delta);
@@ -108,19 +114,17 @@ export default class Slime extends Monster {
         let dx = 0;
         let dy = 0;
         if (this.dir === CONSTANTS.DIRECTION.LEFT) {
-          dx = -8;
+          dx = -8 * this.nowAttackTiming / this.attackDuration;
         } else if (this.dir === CONSTANTS.DIRECTION.RIGHT) {
-          dx = 8;
+          dx = 8 * this.nowAttackTiming / this.attackDuration;
         }
         if (this.dir === CONSTANTS.DIRECTION.UP) {
-          dy = -8;
+          dy = -8 * this.nowAttackTiming / this.attackDuration;
         } else if (this.dir === CONSTANTS.DIRECTION.DOWN) {
-          dy = 8;
+          dy = 8 * this.nowAttackTiming / this.attackDuration;
         }
-        this.sprite.x =
-          this.x - this.sprite.width / 2 + dx * this.nowAttackFrame;
-        this.sprite.y =
-          this.y - this.sprite.height / 2 + dy * this.nowAttackFrame;
+        this.sprite.x = this.x + dx * this.nowAttackFrame;
+        this.sprite.y = this.y + dy * this.nowAttackFrame;
         break;
       }
       case CONSTANTS.MONSTER_STATUS.WALKING:
@@ -128,9 +132,10 @@ export default class Slime extends Monster {
         this.sprite.texture = this.textures[
           `${this.monsterName}_face_down_${this.nowJump}.png`
         ];
-        this.sprite.x = this.x - this.sprite.width / 2;
-        this.sprite.y = this.y - this.sprite.height / 2;
+        this.sprite.x = this.x;
+        this.sprite.y = this.y;
         break;
     }
+    super.updateZOder();
   }
 }

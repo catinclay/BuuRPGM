@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import 'pixi-display';
 import Hero from './components/hero';
 import StatusDashboard from './components/statusDashboard';
 import Slime from './components/slime';
@@ -18,11 +19,16 @@ const app = new Application({
 });
 
 const battleGroundHeight = 500;
-const battleGround = new Container();
+const battleScene = new Container();
 let statusDashboard;
 let hero;
 const monsters = [];
 document.body.appendChild(app.view);
+const battleGround = new Container();
+battleGround.displayList = new PIXI.DisplayList();
+const bottomUiLayer = new PIXI.DisplayGroup(-1, true);
+const battleLayer = new PIXI.DisplayGroup(0, true);
+const upperUiLayer = new PIXI.DisplayGroup(1, true);
 
 function setupHero() {
   hero = new Hero({
@@ -30,6 +36,8 @@ function setupHero() {
     y: battleGroundHeight / 2,
     dir: CONSTANTS.DIRECTION.DOWN, // down
   });
+  hero.addToContainer(battleGround);
+  hero.setLayer(bottomUiLayer, battleLayer, upperUiLayer);
 }
 
 function setupMonster() {
@@ -67,6 +75,7 @@ function setupMonster() {
   );
 
   for (let i = monsters.length - 1; i >= 0; i -= 1) {
+    monsters[i].setLayer(battleLayer);
     battleGround.addChild(monsters[i].container);
   }
 }
@@ -79,7 +88,6 @@ function mousedown(e) {
 }
 
 function setupBattleGround() {
-  app.stage.addChild(battleGround);
   const background = new PIXI.Graphics();
   background.beginFill(0x1099bb);
   background.drawRect(0, 0, app.screen.width, battleGroundHeight);
@@ -87,6 +95,7 @@ function setupBattleGround() {
   battleGround.addChild(background);
   battleGround.interactive = true;
   battleGround.on('pointerdown', mousedown);
+  battleScene.addChild(battleGround);
 }
 
 function setupStatusDashboard() {
@@ -97,7 +106,7 @@ function setupStatusDashboard() {
     height: app.screen.height - battleGroundHeight,
     hero,
   });
-  battleGround.addChild(statusDashboard.container);
+  battleScene.addChild(statusDashboard.container);
 }
 
 function gameLoop(delta) {
@@ -115,9 +124,10 @@ function gameLoop(delta) {
 function setupGame() {
   setupBattleGround();
   setupHero();
-  setupStatusDashboard();
   setupMonster();
-  battleGround.addChild(hero.sprite);
+  setupStatusDashboard();
+
+  app.stage.addChild(battleScene);
   app.ticker.add(delta => {
     gameLoop(delta);
   });
@@ -126,5 +136,9 @@ function setupGame() {
 ProgressBar.barAsync(loader, app.stage);
 
 loader
-  .add(['assets/images/slime.json', 'assets/images/link.json'])
+  .add([
+    'assets/images/slime.json',
+    'assets/images/link.json',
+    'assets/images/control_unit.json',
+  ])
   .load(setupGame);

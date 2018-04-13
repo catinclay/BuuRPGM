@@ -11,19 +11,20 @@ function goToTargetUtil(o, t, movedis) {
   const dy = t.y - o.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
   if (dist === 0) {
-    return;
+    return true;
   }
 
   if (dist < movedis) {
     o.x = t.x;
     o.y = t.y;
-    return;
+    return true;
   }
 
   const rx = dx / dist;
   const ry = dy / dist;
   o.x += movedis * rx;
   o.y += movedis * ry;
+  return false;
 }
 
 function faceToTargetUtil(o, t) {
