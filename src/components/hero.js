@@ -150,6 +150,7 @@ export default class Hero {
       this.sprite.texture = this.textures[`link_dead.png`];
       this.sprite.x = this.x;
       this.sprite.y = this.y;
+      this.sprite.anchor.set(0.5, 0.8);
     }
   }
 
@@ -241,6 +242,7 @@ export default class Hero {
         this.sprite.texture = this.textures[
           `link_face_${this.dir}_${this.nowStepFrame}.png`
         ];
+        this.sprite.anchor.set(0.5, 0.8);
         this.sprite.x = this.x;
         this.sprite.y = this.y;
         this.goToTargetMarkSprite.x = this.target.x;
