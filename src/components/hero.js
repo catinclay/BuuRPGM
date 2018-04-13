@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
 import Effect from './effect';
+import Item from '../item';
 import {
   getDistUtil,
   goToTargetUtil,
@@ -33,7 +34,32 @@ export default class Hero {
     this.maxHp = 100;
     this.hp = this.maxHp;
     this.armor = 0;
+    this.itemList = new Array(CONSTANTS.MAX_ITEM_NUM);
   }
+
+  loadItem(item){
+    if(!item || !item instanceof Item){
+      return;
+    }
+    if(itemList.length < CONSTANTS.MAX_ITEM_NUM-1){
+      itemList.push(item);
+      item.on(this);
+    }
+  }
+
+  unloadItem(index){
+    if(index<itemList.length){
+      let deletedItem = item.splice(index,1);
+      deletedItem.off(this);
+    }
+  }
+
+  useItem(index,target,canUseCallback){
+    if(index<itemList.length){
+      itemList[iindex].use(this,target,canUseCallback);
+    }
+  }
+
 
   onClickGround(args) {
     this.target.x = args.x;
