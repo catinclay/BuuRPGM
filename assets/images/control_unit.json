@@ -1,0 +1,24 @@
+{
+  "frames":{
+    "go_to_target_mark.png":{
+      "frame":{"x":0,"y":32,"w":20,"h":18},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":20,"h":18}, 
+      "sourceSize":{"w":20,"h":18}
+    },
+    "click_target_mark.png":{
+      "frame":{"x":0,"y":51,"w":32,"h":32},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":32,"h":32}, 
+      "sourceSize":{"w":32,"h":32}
+    }
+  },
+  "meta":{
+    "app":"",
+    "version":"1.0",
+    "image":"control_unit.png",
+    "format":"RGBA8888",
+    "size":{"w":400,"h":300}}
+}
