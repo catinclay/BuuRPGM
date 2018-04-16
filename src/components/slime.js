@@ -106,6 +106,7 @@ export default class Slime extends Monster {
     if (this.isShowingHp) {
       super.updateHp();
     }
+    const attackOffset = 6;
     switch (this.status) {
       case CONSTANTS.MONSTER_STATUS.ATTACKING: {
         this.sprite.texture = this.textures[
@@ -114,14 +115,14 @@ export default class Slime extends Monster {
         let dx = 0;
         let dy = 0;
         if (this.dir === CONSTANTS.DIRECTION.LEFT) {
-          dx = -8 * this.nowAttackTiming / this.attackDuration;
+          dx = -1 * attackOffset * this.nowAttackTiming / this.attackDuration;
         } else if (this.dir === CONSTANTS.DIRECTION.RIGHT) {
-          dx = 8 * this.nowAttackTiming / this.attackDuration;
+          dx = attackOffset * this.nowAttackTiming / this.attackDuration;
         }
         if (this.dir === CONSTANTS.DIRECTION.UP) {
-          dy = -8 * this.nowAttackTiming / this.attackDuration;
+          dy = -1 * attackOffset * this.nowAttackTiming / this.attackDuration;
         } else if (this.dir === CONSTANTS.DIRECTION.DOWN) {
-          dy = 8 * this.nowAttackTiming / this.attackDuration;
+          dy = attackOffset * this.nowAttackTiming / this.attackDuration;
         }
         this.sprite.x = this.x + dx * this.nowAttackFrame;
         this.sprite.y = this.y + dy * this.nowAttackFrame;

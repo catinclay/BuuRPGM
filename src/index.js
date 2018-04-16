@@ -140,5 +140,6 @@ loader
     'assets/images/slime.json',
     'assets/images/link.json',
     'assets/images/control_unit.json',
+    'assets/images/skill_1.json',
   ])
   .load(setupGame);
