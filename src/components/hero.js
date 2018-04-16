@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
 import Effect from './effect';
+import SkillBash from './skill-bash';
 import {
   getDistUtil,
   goToTargetUtil,
@@ -59,6 +60,10 @@ export default class Hero {
     this.maxHp = 150;
     this.hp = this.maxHp;
     this.armor = 0;
+
+    // Skills
+    this.skillsSet = {};
+    this.skillsSet['bash'] = new SkillBash();
   }
 
   addToContainer(container) {
@@ -137,6 +142,17 @@ export default class Hero {
     }
   }
 
+  useSkill(delta) {
+    switch (this.usingSkill.targetType) {
+      case CONSTANTS.SKILL_TARGET_TYPE.SINGLE:
+      default:
+        if (this.usingSkill.updateUse(delta, this, this.targetMonster)) {
+          this.usingSkill = undefined;
+        }
+        break;
+    }
+  }
+
   calculateEffects() {
     for (let i = 0; i < this.effects.length; i += 1) {
       this.effects[i].onEffect(this);
@@ -182,7 +198,25 @@ export default class Hero {
       return;
     }
 
-    if (this.targetMonster === undefined) {
+    // check skill usage array
+    // check if skill available
+    // get into SKILLING, start nowSkillFrame
+    // set this.status = CONSTANTS.HERO_STATUS.SKILLING;
+    let preUseSkillResult;
+    if (this.usingSkill !== undefined) {
+      switch (this.usingSkill.targetType) {
+        case CONSTANTS.SKILL_TARGET_TYPE.SINGLE:
+        default:
+          preUseSkillResult = this.usingSkill.beforeUse(this, this.targetMonster);
+          break;
+      }
+    }
+
+    if (preUseSkillResult === CONSTANTS.SKILL_CHECK_RESULT_TYPE.SUCCESS){
+      this.status = CONSTANTS.HERO_STATUS.SKILLING;
+    } 
+    // Check should attack or walk.
+    else if (this.targetMonster === undefined) {
       this.status = CONSTANTS.HERO_STATUS.WALKING;
     } else if (
       this.targetMonster !== undefined &&
@@ -194,8 +228,12 @@ export default class Hero {
     } else {
       this.status = CONSTANTS.HERO_STATUS.ATTACKING;
     }
+  
 
     switch (this.status) {
+      case CONSTANTS.HERO_STATUS.SKILLING:
+        this.useSkill(delta);
+        break;
       case CONSTANTS.HERO_STATUS.ATTACKING:
         this.attackMonster(delta);
         break;
@@ -208,6 +246,9 @@ export default class Hero {
 
   updateImage() {
     switch (this.status) {
+      case CONSTANTS.HERO_STATUS.SKILLING:
+        this.usingSkill.updateTexture(this);
+        break;
       case CONSTANTS.HERO_STATUS.ATTACKING: {
         this.sprite.texture = this.textures[
           `link_attack_${this.dir}_${this.nowAttackFrame}.png`

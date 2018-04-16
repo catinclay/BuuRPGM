@@ -17,7 +17,24 @@ export default class StatusDashboard {
     this.graphics = new PIXI.Graphics();
     this.container.addChild(this.graphics);
     this.margin = 20;
+
+
+    // DEMO
+    this.textures = PIXI.loader.resources['assets/images/skill_1.json'].textures;
+    this.skillSprite = new PIXI.Sprite(this.textures[
+          `bash_icon.png`
+        ]);
+    this.bashSkill = this.skillsSet['bash'];
+    this.container.addChild(this.bashSkill.skillIconSprite);
+    this.bashSkill.skillIconSprite.x = this.x + 200;
+    this.bashSkill.skillIconSprite.y = this.y + 100;
+    this.bashSkill.skillIconSprite.on('pointerdown', this.onBashSkillClick.bind(this));
   }
+
+  onBashSkillClick(e) {
+    this.hero.usingSkill = this.bashSkill;
+  }
+
   update() {
     this.graphics.clear();
 
@@ -37,5 +54,7 @@ export default class StatusDashboard {
       Math.max(0, this.hero.hp),
       (this.height = 13)
     );
+    //DEMO
+    this.bashSkill.updateIcon();
   }
 }
