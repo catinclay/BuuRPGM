@@ -47,7 +47,6 @@ const release = {
   TARGET_MARK_PROP: Object.freeze(TARGET_MARK_PROP),
   BATTLE_CONSTANTS: Object.freeze(BATTLE_CONSTANTS),
   SKILL_TARGET_TYPE: Object.freeze(SKILL_TARGET_TYPE),
+  SKILL_CHECK_RESULT_TYPE: Object.freeze(SKILL_CHECK_RESULT_TYPE),
 };
 export default Object.freeze(release);
-
-

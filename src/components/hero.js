@@ -11,6 +11,8 @@ import {
 
 export default class Hero {
   constructor(args) {
+    this.consoleLog = args.consoleLog;
+
     // Setup
     this.x = args.x;
     this.y = args.y;
@@ -58,12 +60,20 @@ export default class Hero {
     this.alive = true;
     this.effects = [];
     this.maxHp = 150;
+    this.maxMp = 50;
     this.hp = this.maxHp;
+    this.mp = this.maxMp;
     this.armor = 0;
+    this.mpgen = 1.5 / 60;
+
+    // Layers
+    this.goToTargetMarkSprite.displayGroup = args.battleLayer;
+    this.sprite.displayGroup = args.battleLayer;
+    this.clickTargetMarkSprite.displayGroup = args.upperUiLayer;
 
     // Skills
     this.skillsSet = {};
-    this.skillsSet['bash'] = new SkillBash();
+    this.skillsSet.bash = new SkillBash({ layer: args.upperUiLayer });
   }
 
   addToContainer(container) {
@@ -73,17 +83,14 @@ export default class Hero {
     container.addChild(this.container);
   }
 
-  setLayer(bottomUiLayer, battleLayer, upperUiLayer) {
-    this.goToTargetMarkSprite.displayGroup = battleLayer;
-    this.sprite.displayGroup = battleLayer;
-    this.clickTargetMarkSprite.displayGroup = upperUiLayer;
-  }
-
   onClickGround(args) {
-    this.target.x = args.x;
-    this.target.y = args.y;
-    this.targetMonster = undefined;
-    this.status = CONSTANTS.HERO_STATUS.WALKING;
+    if (this.status !== CONSTANTS.HERO_STATUS.SKILLING) {
+      this.usingSkill = undefined;
+      this.target.x = args.x;
+      this.target.y = args.y;
+      this.targetMonster = undefined;
+      this.status = CONSTANTS.HERO_STATUS.WALKING;
+    }
   }
 
   taretMarkOnMouseClick(e) {
@@ -148,6 +155,8 @@ export default class Hero {
       default:
         if (this.usingSkill.updateUse(delta, this, this.targetMonster)) {
           this.usingSkill = undefined;
+        } else {
+          this.usingSkill.updateImage(this, this.targetMonster);
         }
         break;
     }
@@ -191,6 +200,10 @@ export default class Hero {
   }
 
   update(delta) {
+    this.mp += this.mpgen * delta;
+    if (this.mp > this.maxMp) {
+      this.mp = this.maxMp;
+    }
     this.calculateEffects();
     this.checkAlive();
     if (!this.alive) {
@@ -198,25 +211,54 @@ export default class Hero {
       return;
     }
 
-    // check skill usage array
-    // check if skill available
-    // get into SKILLING, start nowSkillFrame
-    // set this.status = CONSTANTS.HERO_STATUS.SKILLING;
+    const skillsArray = Object.values(this.skillsSet);
+    skillsArray.forEach(sk => sk.updateCD(delta));
+
     let preUseSkillResult;
     if (this.usingSkill !== undefined) {
       switch (this.usingSkill.targetType) {
         case CONSTANTS.SKILL_TARGET_TYPE.SINGLE:
         default:
-          preUseSkillResult = this.usingSkill.beforeUse(this, this.targetMonster);
+          preUseSkillResult = this.usingSkill.beforeUse(
+            this,
+            this.targetMonster
+          );
+          break;
+      }
+    }
+    if (this.status !== CONSTANTS.HERO_STATUS.SKILLING) {
+      switch (preUseSkillResult) {
+        case CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOM:
+          this.consoleLog.text = 'Out of mana.';
+          this.usingSkill = undefined;
+          break;
+        case CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOR:
+          this.consoleLog.text = 'Out of range.';
+          break;
+        case CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOT:
+          this.consoleLog.text = 'Out of target.';
+          this.usingSkill = undefined;
+          break;
+        case CONSTANTS.SKILL_CHECK_RESULT_TYPE.IN_COOL:
+          this.consoleLog.text = 'Skill in cooldown.';
+          this.usingSkill = undefined;
+          break;
+        case CONSTANTS.SKILL_CHECK_RESULT_TYPE.SUCCESS:
+          this.consoleLog.text = '';
+          break;
+        default:
           break;
       }
     }
 
-    if (preUseSkillResult === CONSTANTS.SKILL_CHECK_RESULT_TYPE.SUCCESS){
+    if (
+      this.usingSkill !== undefined &&
+      (this.status === CONSTANTS.HERO_STATUS.SKILLING ||
+        preUseSkillResult === CONSTANTS.SKILL_CHECK_RESULT_TYPE.SUCCESS)
+    ) {
       this.status = CONSTANTS.HERO_STATUS.SKILLING;
-    } 
-    // Check should attack or walk.
-    else if (this.targetMonster === undefined) {
+    } else if (this.targetMonster === undefined) {
+      // Check should attack or walk.
       this.status = CONSTANTS.HERO_STATUS.WALKING;
     } else if (
       this.targetMonster !== undefined &&
@@ -228,12 +270,11 @@ export default class Hero {
     } else {
       this.status = CONSTANTS.HERO_STATUS.ATTACKING;
     }
-  
 
     switch (this.status) {
       case CONSTANTS.HERO_STATUS.SKILLING:
         this.useSkill(delta);
-        break;
+        return;
       case CONSTANTS.HERO_STATUS.ATTACKING:
         this.attackMonster(delta);
         break;
@@ -247,7 +288,6 @@ export default class Hero {
   updateImage() {
     switch (this.status) {
       case CONSTANTS.HERO_STATUS.SKILLING:
-        this.usingSkill.updateTexture(this);
         break;
       case CONSTANTS.HERO_STATUS.ATTACKING: {
         this.sprite.texture = this.textures[

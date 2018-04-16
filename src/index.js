@@ -29,15 +29,24 @@ battleGround.displayList = new PIXI.DisplayList();
 const bottomUiLayer = new PIXI.DisplayGroup(-1, true);
 const battleLayer = new PIXI.DisplayGroup(0, true);
 const upperUiLayer = new PIXI.DisplayGroup(1, true);
+const consoleLog = new PIXI.Text('', {
+  fontFamily: 'Arial',
+  fontSize: 24,
+  fill: 0xff1010,
+  align: 'center',
+});
 
 function setupHero() {
   hero = new Hero({
     x: 400,
     y: battleGroundHeight / 2,
     dir: CONSTANTS.DIRECTION.DOWN, // down
+    bottomUiLayer,
+    battleLayer,
+    upperUiLayer,
+    consoleLog,
   });
   hero.addToContainer(battleGround);
-  hero.setLayer(bottomUiLayer, battleLayer, upperUiLayer);
 }
 
 function setupMonster() {
@@ -105,6 +114,7 @@ function setupStatusDashboard() {
     width: app.screen.width,
     height: app.screen.height - battleGroundHeight,
     hero,
+    consoleLog,
   });
   battleScene.addChild(statusDashboard.container);
 }

@@ -16,28 +16,35 @@ export default class StatusDashboard {
     this.container.addChild(background);
     this.graphics = new PIXI.Graphics();
     this.container.addChild(this.graphics);
+    this.container.interactive = true;
     this.margin = 20;
 
-
     // DEMO
-    this.textures = PIXI.loader.resources['assets/images/skill_1.json'].textures;
-    this.skillSprite = new PIXI.Sprite(this.textures[
-          `bash_icon.png`
-        ]);
-    this.bashSkill = this.skillsSet['bash'];
+    this.bashSkill = this.hero.skillsSet.bash;
     this.container.addChild(this.bashSkill.skillIconSprite);
-    this.bashSkill.skillIconSprite.x = this.x + 200;
-    this.bashSkill.skillIconSprite.y = this.y + 100;
-    this.bashSkill.skillIconSprite.on('pointerdown', this.onBashSkillClick.bind(this));
+    this.bashSkill.skillIconSprite.x = this.x + 220;
+    this.bashSkill.skillIconSprite.y = this.y + 40;
+
+    // Move to skill-bash.js?
+    this.bashSkill.skillIconSprite.on(
+      'pointerdown',
+      this.onBashSkillClick.bind(this)
+    );
+
+    this.container.addChild(this.consoleLog);
+    this.consoleLog.x = this.x + 300;
+    this.consoleLog.y = this.y + 20;
   }
 
+  // Move to skill-bash.js
   onBashSkillClick(e) {
     this.hero.usingSkill = this.bashSkill;
+    e.stopPropagation();
   }
 
   update() {
     this.graphics.clear();
-
+    // HP
     this.graphics.lineStyle(2, 0x000000, 1);
     this.graphics.beginFill(0xffffff, 1);
     this.graphics.drawRect(
@@ -54,7 +61,26 @@ export default class StatusDashboard {
       Math.max(0, this.hero.hp),
       (this.height = 13)
     );
-    //DEMO
+
+    // MP
+    this.graphics.lineStyle(2, 0x000000, 1);
+    this.graphics.beginFill(0xffffff, 1);
+    this.graphics.drawRect(
+      this.x + this.margin - 1,
+      this.y + this.margin * 2,
+      this.hero.maxMp * 2 + 2,
+      (this.height = 15)
+    );
+    this.graphics.lineStyle(0, 0x000000, 1);
+    this.graphics.beginFill(0x0033ff, 1);
+    this.graphics.drawRect(
+      this.x + this.margin,
+      this.y + 1 + this.margin * 2,
+      Math.max(0, this.hero.mp * 2),
+      (this.height = 13)
+    );
+
+    // DEMO
     this.bashSkill.updateIcon();
   }
 }
