@@ -74,6 +74,35 @@ export default class Hero {
     // Skills
     this.skillsSet = {};
     this.skillsSet.bash = new SkillBash({ layer: args.upperUiLayer });
+
+    //Items
+    this.equipmentList = new Array(6);
+    this.scrollList = new Array(6);
+  }
+  loadEquipment(equipment) {
+    if (!equipment || !(equipment instanceof Equipment)) {
+      return;
+    }
+    if (this.equipmentList.length < CONSTANTS.MAX_ITEM_NUM) {
+      this.equipmentList.push(equipment);
+      equipment.set(this).on();
+    }
+  }
+
+  unloadEquipment(index) {
+    if (index < this.equipmentList.length) {
+      const deletedItem = this.equipmentList.splice(index, 1);
+      deletedItem.off(this);
+    }
+  }
+
+  useScroll(index, target, cb) {
+    if (index < this.scrollList.length) {
+      this.scrollList[index]
+        .from(this)
+        .to(target)
+        .cast(cb);
+    }
   }
 
   addToContainer(container) {
