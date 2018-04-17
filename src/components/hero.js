@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
 import Effect from './effect';
-import Item from '../item';
+import Equipment from '../items/equipment';
 import {
   getDistUtil,
   goToTargetUtil,
@@ -34,32 +34,35 @@ export default class Hero {
     this.maxHp = 100;
     this.hp = this.maxHp;
     this.armor = 0;
-    this.itemList = new Array(CONSTANTS.MAX_ITEM_NUM);
+    this.equipmentList = new Array(CONSTANTS.MAX_ITEM_NUM);
+    this.scrollList = new Array(CONSTANTS.MAX_ITEM_NUM);
   }
 
-  loadItem(item){
-    if(!item || !item instanceof Item){
+  loadEquipment(equipment) {
+    if (!equipment || !(equipment instanceof Equipment)) {
       return;
     }
-    if(itemList.length < CONSTANTS.MAX_ITEM_NUM-1){
-      itemList.push(item);
-      item.on(this);
+    if (this.equipmentList.length < CONSTANTS.MAX_ITEM_NUM) {
+      this.equipmentList.push(equipment);
+      equipment.set(this).on();
     }
   }
 
-  unloadItem(index){
-    if(index<itemList.length){
-      let deletedItem = item.splice(index,1);
+  unloadEquipment(index) {
+    if (index < this.equipmentList.length) {
+      const deletedItem = this.equipmentList.splice(index, 1);
       deletedItem.off(this);
     }
   }
 
-  useItem(index,target,canUseCallback){
-    if(index<itemList.length){
-      itemList[iindex].use(this,target,canUseCallback);
+  useScroll(index, target, cb) {
+    if (index < this.scrollList.length) {
+      this.scrollList[index]
+        .from(this)
+        .to(target)
+        .cast(cb);
     }
   }
-
 
   onClickGround(args) {
     this.target.x = args.x;
