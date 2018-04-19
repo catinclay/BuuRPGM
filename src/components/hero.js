@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
 import Effect from './effect';
-import SkillBash from './skill-bash';
+import SkillBash from './Skills/skill-bash';
 import {
   getDistUtil,
   goToTargetUtil,
@@ -55,6 +55,7 @@ export default class Hero {
 
     // Battle variable
     this.attackDuration = 60; // 1 sec per attack
+    this.atkSpeedAmp = 10;
     this.batk = 5;
     this.fatk = 8;
     this.alive = true;
@@ -77,6 +78,9 @@ export default class Hero {
       layer: args.upperUiLayer,
       hero: this,
     });
+
+    // Items
+    this.itemList = {};
   }
 
   addToContainer(container) {
@@ -131,9 +135,9 @@ export default class Hero {
     }
     faceToTargetUtil(this, this.targetMonster);
     this.nowAttackTiming += delta;
-    if (this.nowAttackTiming < this.attackDuration * 0.4) {
+    if (this.nowAttackTiming < this.getAttackDuration() * 0.4) {
       this.nowAttackFrame = 0;
-    } else if (this.nowAttackTiming < this.attackDuration * 0.7) {
+    } else if (this.nowAttackTiming < this.getAttackDuration() * 0.7) {
       this.nowAttackFrame = 1;
     } else {
       if (this.nowAttackFrame === 1) {
@@ -147,8 +151,8 @@ export default class Hero {
       }
       this.nowAttackFrame = 2;
     }
-    if (this.nowAttackTiming >= this.attackDuration) {
-      this.nowAttackTiming -= this.attackDuration;
+    if (this.nowAttackTiming >= this.getAttackDuration()) {
+      this.nowAttackTiming -= this.getAttackDuration();
     }
   }
 
@@ -336,5 +340,9 @@ export default class Hero {
     this.updateTargetMark();
 
     this.sprite.zOrder = -this.sprite.y - this.sprite.height / 2;
+  }
+
+  getAttackDuration() {
+    return this.attackDuration / this.atkSpeedAmp;
   }
 }

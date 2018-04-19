@@ -15,6 +15,10 @@ export default class Effect {
           (target.armor + CONSTANTS.BATTLE_CONSTANTS.ARMOR_BASE));
     }
 
+    if (this.heal !== undefined) {
+      target.hp = Math.min(target.hp + this.heal, target.maxHp);
+    }
+
     // Aggro
     if (this.aggro === true) {
       target.aggro = true;

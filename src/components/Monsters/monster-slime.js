@@ -1,14 +1,14 @@
 import * as PIXI from 'pixi.js';
-import Monster from './monster';
-import MONSTER_PROFILES from '../monsterProfiles';
-import CONSTANTS from '../constants';
-import Effect from './effect';
+import Monster from '../monster';
+import MONSTER_PROFILES from '../../monsterProfiles';
+import CONSTANTS from '../../constants';
+import Effect from '../effect';
 import {
   getDistUtil,
   goToTargetUtil,
   faceToTargetUtil,
   getRandomIntUtil,
-} from '../utils';
+} from '../../utils';
 
 export default class Slime extends Monster {
   constructor(args) {
@@ -30,6 +30,7 @@ export default class Slime extends Monster {
     this.moveSpeed = MONSTER_PROFILES.SLIME.MVSPD;
     this.armor = MONSTER_PROFILES.SLIME.ARMOR;
     this.aggroRange = MONSTER_PROFILES.SLIME.AGGRORANGE;
+    this.dropItemList = MONSTER_PROFILES.SLIME.DROP_ITEM_LIST;
 
     this.status = CONSTANTS.MONSTER_STATUS.WALKING;
     this.nowAttackTiming = 0;

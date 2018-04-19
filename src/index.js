@@ -2,9 +2,10 @@ import * as PIXI from 'pixi.js';
 import 'pixi-display';
 import Hero from './components/hero';
 import StatusDashboard from './components/statusDashboard';
-import Slime from './components/slime';
+import Slime from './components/Monsters/monster-slime';
 import CONSTANTS from './constants';
 import ProgressBar from './progressBar';
+// import { getRandomIntUtil } from './utils';
 
 const { Application } = PIXI;
 const { loader } = PIXI;
@@ -128,6 +129,19 @@ function gameLoop(delta) {
       monsters.splice(i, 1);
     }
   }
+
+  // if (monsters.length < 5) {
+  //     monsters.push(
+  //     new Slime({
+  //       x: 50 + getRandomIntUtil(700),
+  //       y: 50 + getRandomIntUtil(400),
+  //       dir: CONSTANTS.DIRECTION.DOWN,
+  //       hero,
+  //     })
+  //   );
+  //   monsters[monsters.length-1].setLayer(battleLayer);
+  //   battleGround.addChild(monsters[monsters.length-1].container);
+  // }
   statusDashboard.update();
 }
 

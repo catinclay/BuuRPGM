@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { getRandomIntUtil } from '../utils';
 
 export default class Monster {
   constructor(args) {
@@ -31,6 +32,7 @@ export default class Monster {
     this.alive = true;
     this.effects = [];
     this.isShowingHp = false;
+    this.dropItemList = [];
   }
 
   destructor() {
@@ -53,10 +55,22 @@ export default class Monster {
 
   checkAlive() {
     if (this.hp <= 0) {
+      if (this.alive) {
+        this.dropItem();
+      }
       this.alive = false;
       this.isShowingHp = false;
       this.destructor();
     }
+  }
+
+  dropItem() {
+    const dropItemListArray = Object.values(this.dropItemList);
+    dropItemListArray.forEach(drop => {
+      if (getRandomIntUtil(10000) <= drop.prop) {
+        // console.log("drop " + drop.item.NAME);
+      }
+    }, this);
   }
 
   setLayer(layer) {

@@ -1,3 +1,5 @@
+import ITEMS from './itemProfiles';
+
 const SLIME = {
   NAME: 'slime',
   MAXHP: 65,
@@ -7,7 +9,8 @@ const SLIME = {
   ATKRANGE: 30,
   MVSPD: 1,
   ARMOR: 0,
-  AGGRORANGE: 110,
+  AGGRORANGE: 130,
+  DROP_ITEM_LIST: [{ item: ITEMS.RED_POTION, prop: 10000 }],
 };
 //
 const release = {

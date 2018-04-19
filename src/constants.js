@@ -39,6 +39,12 @@ const SKILL_CHECK_RESULT_TYPE = {
   IN_COOL: 4,
 };
 
+const ITEM_TARGET_TYPE = {
+  SELF: 0,
+  SINGLE: 1,
+  AREA: 2,
+};
+
 //
 const release = {
   DIRECTION: Object.freeze(DIRECTION),
@@ -48,5 +54,6 @@ const release = {
   BATTLE_CONSTANTS: Object.freeze(BATTLE_CONSTANTS),
   SKILL_TARGET_TYPE: Object.freeze(SKILL_TARGET_TYPE),
   SKILL_CHECK_RESULT_TYPE: Object.freeze(SKILL_CHECK_RESULT_TYPE),
+  ITEM_TARGET_TYPE: Object.freeze(ITEM_TARGET_TYPE),
 };
 export default Object.freeze(release);

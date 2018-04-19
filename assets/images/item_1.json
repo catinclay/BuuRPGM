@@ -1,0 +1,17 @@
+{
+  "frames":{
+    "item_red_potion.png":{
+      "frame":{"x":30,"y":0,"w":13,"h":19},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":13,"h":19}, 
+      "sourceSize":{"w":13,"h":19}
+    }
+  },
+  "meta":{
+    "app":"",
+    "version":"1.0",
+    "image":"item_1.png",
+    "format":"RGBA8888",
+    "size":{"w":400,"h":300}}
+}

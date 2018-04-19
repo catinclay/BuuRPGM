@@ -19,7 +19,6 @@ export default class StatusDashboard {
     this.container.interactive = true;
     this.margin = 20;
 
-    // DEMO
     const skillsArray = Object.values(this.hero.skillsSet);
     this.skillIndex = 0;
     skillsArray.forEach(function(sk) {

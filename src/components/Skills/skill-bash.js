@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js';
-import CONSTANTS from '../constants';
-import Skill from './skill';
-import Effect from './effect';
-import { getDistUtil } from '../utils';
+import CONSTANTS from '../../constants';
+import Skill from '../skill';
+import Effect from '../effect';
+import { getDistUtil } from '../../utils';
 
 export default class SkillBash extends Skill {
   constructor(args) {
