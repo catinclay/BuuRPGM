@@ -73,7 +73,10 @@ export default class Hero {
 
     // Skills
     this.skillsSet = {};
-    this.skillsSet.bash = new SkillBash({ layer: args.upperUiLayer });
+    this.skillsSet.bash = new SkillBash({
+      layer: args.upperUiLayer,
+      hero: this,
+    });
   }
 
   addToContainer(container) {
@@ -212,7 +215,7 @@ export default class Hero {
     }
 
     const skillsArray = Object.values(this.skillsSet);
-    skillsArray.forEach(sk => sk.updateCD(delta));
+    skillsArray.forEach(sk => sk.update(delta));
 
     let preUseSkillResult;
     if (this.usingSkill !== undefined) {

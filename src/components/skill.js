@@ -7,6 +7,14 @@ export default class Skill {
     this.skillIconSprite = new PIXI.Sprite();
     this.skillIconSprite.interactive = true;
     this.skillIconSprite.anchor.set(0.5, 0.5);
+    this.hero = args.hero;
+    // Move to skill-bash.js?
+    this.skillIconSprite.on('pointerdown', this.onSkillClick.bind(this));
+  }
+
+  update(delta) {
+    this.updateCD(delta);
+    this.updateIcon();
   }
 
   updateCD(delta) {

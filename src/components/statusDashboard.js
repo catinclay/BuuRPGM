@@ -20,26 +20,18 @@ export default class StatusDashboard {
     this.margin = 20;
 
     // DEMO
-    this.bashSkill = this.hero.skillsSet.bash;
-    this.container.addChild(this.bashSkill.skillIconSprite);
-    this.bashSkill.skillIconSprite.x = this.x + 220;
-    this.bashSkill.skillIconSprite.y = this.y + 40;
-
-    // Move to skill-bash.js?
-    this.bashSkill.skillIconSprite.on(
-      'pointerdown',
-      this.onBashSkillClick.bind(this)
-    );
+    const skillsArray = Object.values(this.hero.skillsSet);
+    this.skillIndex = 0;
+    skillsArray.forEach(function(sk) {
+      this.container.addChild(sk.skillIconSprite);
+      sk.skillIconSprite.x = this.x + 220 + this.skillIndex * 35;
+      sk.skillIconSprite.y = this.y + 40;
+      this.skillIndex += 1;
+    }, this);
 
     this.container.addChild(this.consoleLog);
     this.consoleLog.x = this.x + 300;
     this.consoleLog.y = this.y + 20;
-  }
-
-  // Move to skill-bash.js
-  onBashSkillClick(e) {
-    this.hero.usingSkill = this.bashSkill;
-    e.stopPropagation();
   }
 
   update() {
@@ -79,8 +71,5 @@ export default class StatusDashboard {
       Math.max(0, this.hero.mp * 2),
       (this.height = 13)
     );
-
-    // DEMO
-    this.bashSkill.updateIcon();
   }
 }

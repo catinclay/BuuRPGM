@@ -10,7 +10,7 @@ export default class SkillBash extends Skill {
     this.targetType = CONSTANTS.SKILL_TARGET_TYPE.SINGLE;
     this.attack = 30;
     this.range = 30;
-    this.manaCost = 19;
+    this.manaCost = 18;
     this.cooldownFrame = 180;
     this.cdCounterFrame = 0;
 
@@ -104,6 +104,12 @@ export default class SkillBash extends Skill {
     } else if (sender.dir === CONSTANTS.DIRECTION.RIGHT) {
       sender.sprite.anchor.set(0.25, 0.8);
     }
+  }
+
+  // Move to skill-bash.js
+  onSkillClick(e) {
+    this.hero.usingSkill = this;
+    e.stopPropagation();
   }
 
   updateIcon() {
