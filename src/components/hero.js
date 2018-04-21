@@ -55,7 +55,7 @@ export default class Hero {
 
     // Battle variable
     this.attackDuration = 60; // 1 sec per attack
-    this.atkSpeedAmp = 10;
+    this.atkSpeedAmp = 1;
     this.batk = 5;
     this.fatk = 8;
     this.alive = true;
@@ -78,9 +78,12 @@ export default class Hero {
       layer: args.upperUiLayer,
       hero: this,
     });
-
+    this.skillsSet.bash = new SkillBash({
+      layer: args.upperUiLayer,
+      hero: this,
+    });
     // Items
-    this.itemList = {};
+    this.itemsList = {};
   }
 
   addToContainer(container) {
@@ -127,6 +130,7 @@ export default class Hero {
   }
 
   attackMonster(delta) {
+    this.goToTargetMarkSprite.visible = false;
     if (!this.targetMonster.alive) {
       this.targetMonster = undefined;
       this.target.x = this.x;
@@ -134,7 +138,7 @@ export default class Hero {
       return;
     }
     faceToTargetUtil(this, this.targetMonster);
-    this.nowAttackTiming += delta;
+    this.nowAttackTiming += this.getAttackTimingDelta(delta);
     if (this.nowAttackTiming < this.getAttackDuration() * 0.4) {
       this.nowAttackFrame = 0;
     } else if (this.nowAttackTiming < this.getAttackDuration() * 0.7) {
@@ -343,6 +347,28 @@ export default class Hero {
   }
 
   getAttackDuration() {
-    return this.attackDuration / this.atkSpeedAmp;
+    return this.attackDuration;
+  }
+  getAttackTimingDelta(delta) {
+    return this.atkSpeedAmp * delta;
+  }
+
+  getItem(item) {
+    if (!(item.NAME in this.itemsList)) {
+      this.itemsList[item.NAME] = item.GET_OBJ();
+      this.itemsList[item.NAME].setOwner(this);
+    }
+    this.itemsList[item.NAME].charge(1);
+    this.statusDashboard.updateItemsCallBack();
+  }
+
+  consumeItem(itemName) {
+    if (itemName in this.itemsList) {
+      this.itemsList[itemName].consume(1);
+      if (this.itemsList[itemName].capacity <= 0) {
+        delete this.itemsList[itemName];
+      }
+    }
+    this.statusDashboard.updateItemsCallBack();
   }
 }
