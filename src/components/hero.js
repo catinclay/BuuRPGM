@@ -144,7 +144,7 @@ export default class Hero {
     } else if (this.nowAttackTiming < this.getAttackDuration() * 0.7) {
       this.nowAttackFrame = 1;
     } else {
-      if (this.nowAttackFrame === 1) {
+      if (this.nowAttackFrame <= 1) {
         this.targetMonster.effects.push(
           new Effect({
             sender: this,

@@ -62,7 +62,7 @@ export default class SkillBash extends Skill {
     } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.8) {
       this.nowSkillFrame = 1;
     } else if (this.nowSkillTiming < this.skillAnimationDuration) {
-      if (this.nowSkillFrame === 1) {
+      if (this.nowSkillFrame <= 1) {
         sender.mp -= this.manaCost;
         this.cdCounterFrame = this.cooldownFrame;
         target.effects.push(
