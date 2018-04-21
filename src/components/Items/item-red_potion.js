@@ -15,6 +15,9 @@ export default class RedPotion extends Item {
   }
 
   onIconClick(e) {
+    if (!this.owner.alive) {
+      return;
+    }
     e.stopPropagation();
     this.owner.effects.push(
       new Effect({
