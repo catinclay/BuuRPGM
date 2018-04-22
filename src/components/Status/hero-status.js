@@ -1,4 +1,4 @@
-import State from '../status';
+import Status from '../status';
 import SkillStatus
 
 export default class HeroStatus extends Status {
@@ -22,6 +22,10 @@ export default class HeroStatus extends Status {
 	    this.mpgen = 1.5 / 60;
 	    this.moveSpeed = 2;
     	this.attackRange = 30;
+
+    	this.skill =
+    	this.animation = 
+    	
     	*/
 	}
 }
