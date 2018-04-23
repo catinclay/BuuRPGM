@@ -6,11 +6,24 @@ export default class HeroStatus extends Status {
   constructor(args) {
     super(args);
     function initStatus(initArgs) {
-      const status = Object.create(null);
+      const status = {};
+      //
       status.x = initArgs.x;
       status.y = initArgs.y;
       status.dir = initArgs.dir;
 
+      // Layers
+      status.goToTargetMarkSprite.displayGroup = initArgs.battleLayer;
+      status.sprite.displayGroup = initArgs.battleLayer;
+      status.status.clickTargetMarkSprite.displayGroup = initArgs.upperUiLayer;
+
+      // Skills
+      status.skillsSet = {};
+      status.skillsSet.bash = new SkillBash({
+        layer: initArgs.upperUiLayer,
+        hero: status,
+      });
+      //
       status.textures =
         PIXI.loader.resources['assets/images/link.json'].textures;
       status.sprite = new PIXI.Sprite(
@@ -61,23 +74,15 @@ export default class HeroStatus extends Status {
       status.armor = 0;
       status.mpgen = 1.5 / 60;
 
-      // Layers
-      status.goToTargetMarkSprite.displayGroup = initArgs.battleLayer;
-      status.sprite.displayGroup = initArgs.battleLayer;
-      status.status.clickTargetMarkSprite.displayGroup = initArgs.upperUiLayer;
-
-      // Skills
-      status.skillsSet = {};
-      status.skillsSet.bash = new SkillBash({
-        layer: initArgs.upperUiLayer,
-        hero: status,
-      });
-
       // Items
       status.itemList = {};
 
       return status;
     }
-    Object.assign(this, initStatus(args));
+    if (args instanceof Status) {
+      Object.assing(this, args);
+    } else {
+      Object.assign(this, initStatus(args));
+    }
   }
 }

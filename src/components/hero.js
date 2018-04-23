@@ -14,7 +14,7 @@ import HeroAction from './Actions/hero-action';
 export default class Hero {
   constructor(args) {
     this.consoleLog = args.consoleLog;
-    this.status = Object.assing({}, new HeroStatus());
+    this.status = new HeroStatus(args);
     this.action = CONSTANTS.HERO_STATUS.WALKING;
     // temporary init status
   }
