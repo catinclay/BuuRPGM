@@ -16,7 +16,7 @@ export default class Hero {
     this.consoleLog = args.consoleLog;
     this.status = new HeroStatus(args);
     this.action = CONSTANTS.HERO_STATUS.WALKING;
-    // temporary init status
+
   }
 
   addToContainer(container) {
@@ -216,6 +216,28 @@ export default class Hero {
   }
 
   getAttackDuration() {
-    return this.attackDuration / this.atkSpeedAmp;
+    return this.attackDuration;
+  }
+  getAttackTimingDelta(delta) {
+    return this.atkSpeedAmp * delta;
+  }
+
+  getItem(item) {
+    if (!(item.NAME in this.itemsList)) {
+      this.itemsList[item.NAME] = item.GET_OBJ();
+      this.itemsList[item.NAME].setOwner(this);
+    }
+    this.itemsList[item.NAME].charge(1);
+    this.statusDashboard.updateItemsCallBack();
+  }
+
+  consumeItem(itemName) {
+    if (itemName in this.itemsList) {
+      this.itemsList[itemName].consume(1);
+      if (this.itemsList[itemName].capacity <= 0) {
+        delete this.itemsList[itemName];
+      }
+    }
+    this.statusDashboard.updateItemsCallBack();
   }
 }

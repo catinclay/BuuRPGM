@@ -3,10 +3,10 @@ import ITEMS from '../../itemProfiles';
 import CONSTANTS from '../../constants';
 import Effect from '../effect';
 
-export default class RedPotion extends Item {
+export default class BluePotion extends Item {
   constructor(args) {
     super(args);
-    this.name = ITEMS.RED_POTION.NAME;
+    this.name = ITEMS.BLUE_POTION.NAME;
     this.itemTargetType = CONSTANTS.ITEM_TARGET_TYPE.SELF;
     this.capacity = 0;
     this.itemIconSprite.texture = this.textures[`item_${this.name}_icon.png`];
@@ -15,15 +15,12 @@ export default class RedPotion extends Item {
   }
 
   onIconClick(e) {
-    if (!this.owner.alive) {
-      return;
-    }
     e.stopPropagation();
     this.owner.effects.push(
       new Effect({
         sender: this.owner,
         target: this.owner,
-        heal: ITEMS.RED_POTION.HEAL,
+        mpRestore: ITEMS.BLUE_POTION.MP_RESTORE,
       })
     );
     this.owner.consumeItem(this.name);

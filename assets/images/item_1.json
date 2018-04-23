@@ -6,6 +6,27 @@
       "trimmed":false,
       "spriteSourceSize":{"x":0,"y":0,"w":13,"h":19}, 
       "sourceSize":{"w":13,"h":19}
+    },
+    "item_red_potion_icon.png":{
+      "frame":{"x":44,"y":0,"w":32,"h":32},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":32,"h":32}, 
+      "sourceSize":{"w":32,"h":32}
+    },
+    "item_blue_potion.png":{
+      "frame":{"x":30,"y":20,"w":13,"h":15},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":13,"h":15}, 
+      "sourceSize":{"w":13,"h":15}
+    },
+    "item_blue_potion_icon.png":{
+      "frame":{"x":76,"y":0,"w":32,"h":32},
+      "rotated":false,
+      "trimmed":false,
+      "spriteSourceSize":{"x":0,"y":0,"w":32,"h":32}, 
+      "sourceSize":{"w":32,"h":32}
     }
   },
   "meta":{

@@ -19,6 +19,10 @@ export default class Effect {
       target.hp = Math.min(target.hp + this.heal, target.maxHp);
     }
 
+    if (this.mpRestore !== undefined) {
+      target.mp = Math.min(target.mp + this.mpRestore, target.maxMp);
+    }
+
     // Aggro
     if (this.aggro === true) {
       target.aggro = true;

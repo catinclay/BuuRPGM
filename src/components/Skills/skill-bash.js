@@ -93,7 +93,7 @@ export default class SkillBash extends Skill {
       nextStatus.container.addChild(this.sprite);
       this.sprite.visible = false;
     }
-    this.nowSkillTiming += delta;
+    this.nowSkillTiming += sender.getAttackTimingDelta(delta);
     if (this.nowSkillTiming < this.skillAnimationDuration * 0.1) {
       this.nowHeroFrame = 0;
     } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.2) {
@@ -108,7 +108,7 @@ export default class SkillBash extends Skill {
     } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.8) {
       this.nowSkillFrame = 1;
     } else if (this.nowSkillTiming < this.skillAnimationDuration) {
-      if (this.nowSkillFrame === 1) {
+      if (this.nowSkillFrame <= 1) {
         nextStatus.mp -= this.manaCost;
         this.cdCounterFrame = this.cooldownFrame;
         nextStatus.targetMonster.effects.push(

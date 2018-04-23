@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { getRandomIntUtil } from '../utils';
+import Drop from './drop';
 
 export default class Monster {
   constructor(args) {
@@ -33,6 +34,7 @@ export default class Monster {
     this.effects = [];
     this.isShowingHp = false;
     this.dropItemList = [];
+    this.dropToBattleGroudCallBack = args.dropToBattleGroudCallBack;
   }
 
   destructor() {
@@ -65,10 +67,18 @@ export default class Monster {
   }
 
   dropItem() {
-    const dropItemListArray = Object.values(this.dropItemList);
-    dropItemListArray.forEach(drop => {
+    this.dropItemList.forEach(drop => {
       if (getRandomIntUtil(10000) <= drop.prop) {
-        // console.log("drop " + drop.item.NAME);
+        const dx = getRandomIntUtil(20) - 10;
+        const dy = getRandomIntUtil(20) - 10;
+        this.dropToBattleGroudCallBack(
+          new Drop({
+            item: drop.item,
+            x: this.x + dx,
+            y: this.y + dy,
+            hero: this.hero,
+          })
+        );
       }
     }, this);
   }
