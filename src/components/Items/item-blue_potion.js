@@ -1,7 +1,6 @@
 import Item from '../item';
 import ITEMS from '../../itemProfiles';
 import CONSTANTS from '../../constants';
-import Effect from '../effect';
 
 export default class BluePotion extends Item {
   constructor(args) {
@@ -15,9 +14,12 @@ export default class BluePotion extends Item {
   }
 
   onIconClick(e) {
+    if (!this.owner.alive) {
+      return;
+    }
     e.stopPropagation();
     this.owner.effects.push(
-      new Effect({
+      this.effectFactory.createEffect({
         sender: this.owner,
         target: this.owner,
         mpRestore: ITEMS.BLUE_POTION.MP_RESTORE,

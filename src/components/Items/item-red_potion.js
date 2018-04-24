@@ -1,7 +1,6 @@
 import Item from '../item';
 import ITEMS from '../../itemProfiles';
 import CONSTANTS from '../../constants';
-import Effect from '../effect';
 
 export default class RedPotion extends Item {
   constructor(args) {
@@ -20,7 +19,7 @@ export default class RedPotion extends Item {
     }
     e.stopPropagation();
     this.owner.effects.push(
-      new Effect({
+      this.effectFactory.createEffect({
         sender: this.owner,
         target: this.owner,
         heal: ITEMS.RED_POTION.HEAL,

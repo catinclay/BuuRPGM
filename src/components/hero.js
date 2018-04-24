@@ -1,6 +1,5 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
-import Effect from './effect';
 import SkillBash from './Skills/skill-bash';
 import {
   getDistUtil,
@@ -72,16 +71,17 @@ export default class Hero {
     this.sprite.displayGroup = args.battleLayer;
     this.clickTargetMarkSprite.displayGroup = args.upperUiLayer;
 
+    // Effects
+    this.effectFactory = args.effectFactory;
+
     // Skills
     this.skillsSet = {};
     this.skillsSet.bash = new SkillBash({
       layer: args.upperUiLayer,
       hero: this,
+      effectFactory: this.effectFactory,
     });
-    this.skillsSet.bash = new SkillBash({
-      layer: args.upperUiLayer,
-      hero: this,
-    });
+
     // Items
     this.itemsList = {};
   }
@@ -146,10 +146,11 @@ export default class Hero {
     } else {
       if (this.nowAttackFrame <= 1) {
         this.targetMonster.effects.push(
-          new Effect({
+          this.effectFactory.createEffect({
             sender: this,
             damage: this.batk + getRandomIntUtil(this.fatk),
             aggro: true,
+            color: 0xdddddd,
           })
         );
       }
@@ -157,6 +158,7 @@ export default class Hero {
     }
     if (this.nowAttackTiming >= this.getAttackDuration()) {
       this.nowAttackTiming -= this.getAttackDuration();
+      this.nowAttackFrame = 0;
     }
   }
 
@@ -355,7 +357,9 @@ export default class Hero {
 
   getItem(item) {
     if (!(item.NAME in this.itemsList)) {
-      this.itemsList[item.NAME] = item.GET_OBJ();
+      this.itemsList[item.NAME] = item.GET_OBJ({
+        effectFactory: this.effectFactory,
+      });
       this.itemsList[item.NAME].setOwner(this);
     }
     this.itemsList[item.NAME].charge(1);

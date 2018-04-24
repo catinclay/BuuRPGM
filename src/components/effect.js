@@ -9,18 +9,43 @@ export default class Effect {
   onEffect(target) {
     // Normal Attack
     if (this.damage !== undefined) {
-      target.hp -=
+      const actualDamage =
         this.damage *
         (CONSTANTS.BATTLE_CONSTANTS.ARMOR_BASE /
           (target.armor + CONSTANTS.BATTLE_CONSTANTS.ARMOR_BASE));
+      target.hp -= actualDamage;
+      const color = this.color === undefined ? 0x993333 : this.color;
+      this.popEffectString({
+        text: actualDamage,
+        x: target.x,
+        y: target.y,
+        color,
+      });
     }
 
     if (this.heal !== undefined) {
-      target.hp = Math.min(target.hp + this.heal, target.maxHp);
+      const actualHeal = Math.min(this.heal, target.maxHp - target.hp);
+      target.hp += actualHeal;
+      this.popEffectString({
+        text: Math.floor(actualHeal),
+        x: target.x,
+        y: target.y,
+        color: '0x33DD33',
+      });
     }
 
     if (this.mpRestore !== undefined) {
-      target.mp = Math.min(target.mp + this.mpRestore, target.maxMp);
+      const actualMpRestore = Math.min(
+        this.mpRestore,
+        target.maxMp - target.mp
+      );
+      target.mp += actualMpRestore;
+      this.popEffectString({
+        text: Math.floor(actualMpRestore),
+        x: target.x,
+        y: target.y,
+        color: '0x333399',
+      });
     }
 
     // Aggro
