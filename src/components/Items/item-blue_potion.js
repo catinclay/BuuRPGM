@@ -16,10 +16,10 @@ export default class BluePotion extends Item {
 
   onIconClick(e) {
     e.stopPropagation();
-    this.owner.effects.push(
+    this.owner.status.effects.push(
       new Effect({
-        sender: this.owner,
-        target: this.owner,
+        sender: this.owner.status,
+        target: this.owner.status,
         mpRestore: ITEMS.BLUE_POTION.MP_RESTORE,
       })
     );

@@ -15,14 +15,14 @@ export default class RedPotion extends Item {
   }
 
   onIconClick(e) {
-    if (!this.owner.alive) {
+    if (!this.owner.status.alive) {
       return;
     }
     e.stopPropagation();
-    this.owner.effects.push(
+    this.owner.status.effects.push(
       new Effect({
-        sender: this.owner,
-        target: this.owner,
+        sender: this.owner.status,
+        target: this.owner.status,
         heal: ITEMS.RED_POTION.HEAL,
       })
     );

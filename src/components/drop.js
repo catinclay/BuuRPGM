@@ -24,7 +24,7 @@ export default class Drop {
 
   update(delta) {
     if (!this.shouldDelete && !this.isPicked) {
-      if (getDistUtil(this, this.hero) < 15) {
+      if (getDistUtil(this, this.hero.status) < 15) {
         this.isPicked = true;
         this.hero.getItem(this.item);
       }
