@@ -1,18 +1,17 @@
 import * as PIXI from 'pixi.js';
 import CONSTANTS from '../../constants';
 import Skill from '../skill';
-import Effect from '../effect';
-import { getDistUtil } from '../../utils';
+import { getDistUtil, getRandomIntUtil } from '../../utils';
 import HeroStatus from '../Status/hero-status';
 
 export default class SkillBash extends Skill {
   constructor(args) {
     super(args);
     this.targetType = CONSTANTS.SKILL_TARGET_TYPE.SINGLE;
-    this.attack = 30;
+    this.attack = 15;
     this.range = 30;
-    this.manaCost = 18;
-    this.cooldownFrame = 180;
+    this.manaCost = 22;
+    this.cooldownFrame = 90;
     this.cdCounterFrame = 0;
 
     this.skillAnimationDuration = 60;
@@ -112,10 +111,14 @@ export default class SkillBash extends Skill {
         nextStatus.mp -= this.manaCost;
         this.cdCounterFrame = this.cooldownFrame;
         nextStatus.targetMonster.effects.push(
-          new Effect({
+          this.effectFactory.createEffect({
             nextStatus,
-            damage: this.attack,
+            damage:
+              this.attack +
+              2 * nextStatus.batk +
+              getRandomIntUtil(2 * nextStatus.fatk),
             aggro: true,
+            color: 0xffff33,
           })
         );
       }

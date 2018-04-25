@@ -2,7 +2,6 @@ import * as PIXI from 'pixi.js';
 import Monster from '../monster';
 import MONSTER_PROFILES from '../../monsterProfiles';
 import CONSTANTS from '../../constants';
-import Effect from '../effect';
 import {
   getDistUtil,
   goToTargetUtil,
@@ -54,9 +53,9 @@ export default class Slime extends Monster {
     } else if (this.nowAttackTiming < this.attackDuration * 0.7) {
       this.nowAttackFrame = 1;
     } else {
-      if (this.nowAttackFrame === 1) {
+      if (this.nowAttackFrame <= 1) {
         this.targetObject.status.effects.push(
-          new Effect({
+          this.effectFactory.createEffect({
             sender: this,
             damage: this.batk + getRandomIntUtil(this.fatk),
           })
@@ -66,6 +65,7 @@ export default class Slime extends Monster {
     }
     if (this.nowAttackTiming >= this.attackDuration) {
       this.nowAttackTiming -= this.attackDuration;
+      this.nowAttackFrame = 0;
     }
   }
 

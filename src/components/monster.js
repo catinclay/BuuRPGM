@@ -35,6 +35,9 @@ export default class Monster {
     this.isShowingHp = false;
     this.dropItemList = [];
     this.dropToBattleGroudCallBack = args.dropToBattleGroudCallBack;
+
+    // Effects
+    this.effectFactory = args.effectFactory;
   }
 
   destructor() {

@@ -14,7 +14,7 @@ import HeroAction from './Actions/hero-action';
 export default class Hero {
   constructor(args) {
     this.consoleLog = args.consoleLog;
-    args.hero = this;
+    // args.hero = this;
     this.status = new HeroStatus(args);
     this.action = CONSTANTS.HERO_STATUS.WALKING;
   }
@@ -224,7 +224,9 @@ export default class Hero {
 
   getItem(item) {
     if (!(item.NAME in this.status.itemsList)) {
-      this.status.itemsList[item.NAME] = item.GET_OBJ();
+      this.status.itemsList[item.NAME] = item.GET_OBJ({
+        effectFactory: this.effectFactory,
+      });
       this.status.itemsList[item.NAME].setOwner(this);
     }
     this.status.itemsList[item.NAME].charge(1);

@@ -37,7 +37,7 @@ export default class StatusDashboard {
     this.container.addChild(this.consoleLog);
     this.consoleLog.displayGroup = args.upperUILayer;
     this.consoleLog.x = this.x + 20;
-    this.consoleLog.y = this.y + 60;
+    this.consoleLog.y = this.y + 70;
 
     this.itemContainer.interactive = true;
     this.container.addChild(this.itemContainer);

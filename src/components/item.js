@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 
 export default class Item {
-  constructor() {
+  constructor(args) {
     this.textures = PIXI.loader.resources['assets/images/item_1.json'].textures;
     this.itemCountText = new PIXI.Text('1', {
       fontFamily: 'Arial',
@@ -14,6 +14,7 @@ export default class Item {
     this.itemIconSprite.interactive = true;
     this.itemIconContainer.addChild(this.itemIconSprite);
     this.itemIconContainer.addChild(this.itemCountText);
+    this.effectFactory = args.effectFactory;
     this.capacity = 0;
   }
 

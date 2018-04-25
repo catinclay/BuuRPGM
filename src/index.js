@@ -3,6 +3,7 @@ import 'pixi-display';
 import Hero from './components/hero';
 import StatusDashboard from './components/statusDashboard';
 import Slime from './components/Monsters/monster-slime';
+import EffectFactory from './components/effectFactory';
 import CONSTANTS from './constants';
 import ProgressBar from './progressBar';
 import { getRandomIntUtil } from './utils';
@@ -33,10 +34,15 @@ const bottomUiLayer = new PIXI.DisplayGroup(0, true);
 const battleLayer = new PIXI.DisplayGroup(1, true);
 const upperUiLayer = new PIXI.DisplayGroup(2, true);
 const consoleLog = new PIXI.Text('', {
-  fontFamily: 'Arial',
-  fontSize: 24,
+  fontFamily: 'Press Start 2P',
+  fontSize: 12,
   fill: 0xff1010,
   align: 'center',
+  resolution: 2,
+});
+const effectFactory = new EffectFactory({
+  container: battleGround,
+  upperUiLayer,
 });
 
 function setupHero() {
@@ -48,6 +54,7 @@ function setupHero() {
     battleLayer,
     upperUiLayer,
     consoleLog,
+    effectFactory,
   });
   hero.addToContainer(battleGround);
 }
@@ -114,12 +121,14 @@ function gameLoop(delta) {
         dir: CONSTANTS.DIRECTION.DOWN,
         hero,
         dropToBattleGroudCallBack,
+        effectFactory,
       })
     );
     monsters[monsters.length - 1].setLayer(battleLayer);
     battleGround.addChild(monsters[monsters.length - 1].container);
   }
   statusDashboard.update();
+  effectFactory.update(delta);
 }
 
 function setupGame() {
