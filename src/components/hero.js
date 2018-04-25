@@ -14,9 +14,10 @@ import HeroAction from './Actions/hero-action';
 export default class Hero {
   constructor(args) {
     this.consoleLog = args.consoleLog;
-    // args.hero = this;
+    args.hero = this;
     this.status = new HeroStatus(args);
     this.action = CONSTANTS.HERO_STATUS.WALKING;
+    this.effectFactory = args.effectFactory;
   }
 
   addToContainer(container) {
@@ -160,7 +161,9 @@ export default class Hero {
     this.setUsingSkill(preUseSkillResult);
 
     this.action = this.getNextAction(preUseSkillResult);
-    this.status = HeroAction.filter(this.action, this.status, delta);
+    this.status = new HeroAction({
+      effectFactory: this.effectFactory,
+    }).filter(this.action, this.status, delta);
     this.updateImage();
   }
 

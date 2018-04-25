@@ -1,7 +1,6 @@
 import Action from '../action';
 import HeroStatus from '../Status/hero-status';
 import CONSTANTS from '../../constants';
-import Effect from '../effect';
 import {
   goToTargetUtil,
   faceToTargetUtil,
@@ -16,7 +15,7 @@ function useSkill(currentStatus, delta) {
   }
 }
 
-function attackMonster(currentStatus, delta) {
+function attackMonster(currentStatus, delta, effectFactory) {
   const nextStatus = new HeroStatus(currentStatus);
   if (!nextStatus.targetMonster.alive) {
     nextStatus.targetMonster = undefined;
@@ -33,10 +32,11 @@ function attackMonster(currentStatus, delta) {
   } else {
     if (nextStatus.nowAttackFrame === 1) {
       nextStatus.targetMonster.effects.push(
-        new Effect({
+        effectFactory.createEffect({
           sender: currentStatus,
-          damage: nextStatus.batk + getRandomIntUtil(nextStatus.fatk),
+          damage: currentStatus.batk + getRandomIntUtil(currentStatus.fatk),
           aggro: true,
+          color: 0xdddddd,
         })
       );
     }
@@ -78,19 +78,19 @@ function goToTarget(currentStatus, delta) {
 }
 
 export default class HeroAction extends Action {
-  static filter(action, currentStatus, delta) {
+  filter(action, currentStatus, delta) {
     let nextStatus = currentStatus;
     switch (action) {
       case CONSTANTS.HERO_STATUS.SKILLING:
-        nextStatus = useSkill(currentStatus, delta);
+        nextStatus = useSkill(currentStatus, delta, this.effectFactory);
         break;
       case CONSTANTS.HERO_STATUS.ATTACKING:
-        nextStatus = attackMonster(currentStatus, delta);
+        nextStatus = attackMonster(currentStatus, delta, this.effectFactory);
 
         break;
       case CONSTANTS.HERO_STATUS.WALKING:
       default:
-        nextStatus = goToTarget(currentStatus, delta);
+        nextStatus = goToTarget(currentStatus, delta, this.effectFactory);
         break;
     }
     return nextStatus;

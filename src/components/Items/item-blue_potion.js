@@ -14,7 +14,7 @@ export default class BluePotion extends Item {
   }
 
   onIconClick(e) {
-    if (!this.owner.alive) {
+    if (!this.owner.status.alive) {
       return;
     }
     e.stopPropagation();

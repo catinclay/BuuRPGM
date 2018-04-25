@@ -74,6 +74,7 @@ export default class HeroStatus extends Status {
       status.skillsSet = {};
       status.skillsSet.bash = new SkillBash({
         layer: initArgs.upperUiLayer,
+        effectFactory: initArgs.effectFactory,
         onClick(skill, e) {
           initArgs.hero.status.usingSkill = skill;
           e.stopPropagation();
