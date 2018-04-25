@@ -23,7 +23,7 @@ export default class StatusDashboard {
     this.hero.statusDashboard = this;
     this.updateItemsCallBack();
 
-    const skillsArray = Object.values(this.hero.skillsSet);
+    const skillsArray = Object.values(this.hero.status.skillsSet);
     this.skillIndex = 0;
     skillsArray.forEach(function(sk) {
       const indexX = this.skillIndex % 5;
@@ -55,7 +55,7 @@ export default class StatusDashboard {
     this.graphics.drawRect(
       this.x + this.margin - 1,
       this.y + this.margin,
-      this.hero.maxHp + 2,
+      this.hero.status.maxHp + 2,
       (this.height = 15)
     );
     this.graphics.lineStyle(0, 0x000000, 1);
@@ -63,7 +63,7 @@ export default class StatusDashboard {
     this.graphics.drawRect(
       this.x + this.margin,
       this.y + 1 + this.margin,
-      Math.max(0, this.hero.hp),
+      Math.max(0, this.hero.status.hp),
       (this.height = 13)
     );
 
@@ -73,7 +73,7 @@ export default class StatusDashboard {
     this.graphics.drawRect(
       this.x + this.margin - 1,
       this.y + this.margin * 2,
-      this.hero.maxMp * 2 + 2,
+      this.hero.status.maxMp * 2 + 2,
       (this.height = 15)
     );
     this.graphics.lineStyle(0, 0x000000, 1);
@@ -81,14 +81,14 @@ export default class StatusDashboard {
     this.graphics.drawRect(
       this.x + this.margin,
       this.y + 1 + this.margin * 2,
-      Math.max(0, this.hero.mp * 2),
+      Math.max(0, this.hero.status.mp * 2),
       (this.height = 13)
     );
   }
 
   updateItemsCallBack() {
     this.itemContainer.removeChildren();
-    const itemsArray = Object.values(this.hero.itemsList);
+    const itemsArray = Object.values(this.hero.status.itemsList);
     let itemIndex = 0;
     itemsArray.forEach(function(item) {
       const indexX = itemIndex % 5;

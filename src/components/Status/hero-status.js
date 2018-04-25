@@ -11,18 +11,6 @@ export default class HeroStatus extends Status {
       status.x = initArgs.x;
       status.y = initArgs.y;
       status.dir = initArgs.dir;
-
-      // Layers
-      status.goToTargetMarkSprite.displayGroup = initArgs.battleLayer;
-      status.sprite.displayGroup = initArgs.battleLayer;
-      status.status.clickTargetMarkSprite.displayGroup = initArgs.upperUiLayer;
-
-      // Skills
-      status.skillsSet = {};
-      status.skillsSet.bash = new SkillBash({
-        layer: initArgs.upperUiLayer,
-        hero: status,
-      });
       //
       status.textures =
         PIXI.loader.resources['assets/images/link.json'].textures;
@@ -40,16 +28,21 @@ export default class HeroStatus extends Status {
       );
       status.goToTargetMarkSprite.visible = false;
       status.goToTargetMarkSprite.anchor.set(0.5);
-      status.status.clickTargetMarkSprite = new PIXI.Sprite(
+      status.clickTargetMarkSprite = new PIXI.Sprite(
         PIXI.loader.resources['assets/images/control_unit.json'].textures[
           `click_target_mark.png`
         ]
       );
-      status.status.clickTargetMarkSprite.visible = false;
-      status.status.clickTargetMarkSprite.anchor.set(0.5);
-      status.status.clickTargetMarkSprite.interactive = true;
+      status.clickTargetMarkSprite.visible = false;
+      status.clickTargetMarkSprite.anchor.set(0.5);
+      status.clickTargetMarkSprite.interactive = true;
       status.container = new PIXI.Container();
       status.container.interactive = false;
+
+      // Layers
+      status.goToTargetMarkSprite.displayGroup = initArgs.battleLayer;
+      status.sprite.displayGroup = initArgs.battleLayer;
+      status.clickTargetMarkSprite.displayGroup = initArgs.upperUiLayer;
 
       status.stepCounter = 0;
       status.nowStepFrame = 0;
@@ -75,12 +68,22 @@ export default class HeroStatus extends Status {
       status.mpgen = 1.5 / 60;
 
       // Items
-      status.itemList = {};
-
+      status.itemsList = {};
+      //
+      // Skills
+      status.skillsSet = {};
+      status.skillsSet.bash = new SkillBash({
+        layer: initArgs.upperUiLayer,
+        onClick(skill, e) {
+          initArgs.hero.status.usingSkill = skill;
+          e.stopPropagation();
+        },
+      });
+      //
       return status;
     }
     if (args instanceof Status) {
-      Object.assing(this, args);
+      Object.assign(this, args);
     } else {
       Object.assign(this, initStatus(args));
     }

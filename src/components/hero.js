@@ -14,16 +14,16 @@ import HeroAction from './Actions/hero-action';
 export default class Hero {
   constructor(args) {
     this.consoleLog = args.consoleLog;
+    args.hero = this;
     this.status = new HeroStatus(args);
     this.action = CONSTANTS.HERO_STATUS.WALKING;
-
   }
 
   addToContainer(container) {
-    this.status.container.addChild(this.goToTargetMarkSprite);
+    this.status.container.addChild(this.status.goToTargetMarkSprite);
     this.status.container.addChild(this.status.clickTargetMarkSprite);
     this.status.container.addChild(this.status.sprite);
-    container.addChild(this.container);
+    container.addChild(this.status.container);
   }
 
   onClickGround(args) {
@@ -32,7 +32,7 @@ export default class Hero {
       this.status.target.x = args.x;
       this.status.target.y = args.y;
       this.status.targetMonster = undefined;
-      this.status.action = CONSTANTS.HERO_STATUS.WALKING;
+      this.action = CONSTANTS.HERO_STATUS.WALKING;
     }
   }
 
@@ -41,18 +41,18 @@ export default class Hero {
   }
 
   calculateEffects() {
-    for (let i = 0; i < this.effects.length; i += 1) {
-      this.status.effects[i].onEffect(this);
+    for (let i = 0; i < this.status.effects.length; i += 1) {
+      this.status.effects[i].onEffect(this.status);
     }
     this.status.effects = [];
   }
 
   checkAlive() {
-    if (this.hp <= 0) {
+    if (this.status.hp <= 0) {
       this.status.alive = false;
-      this.status.sprite.texture = this.textures[`link_dead.png`];
-      this.status.sprite.x = this.x;
-      this.status.sprite.y = this.y;
+      this.status.sprite.texture = this.status.textures[`link_dead.png`];
+      this.status.sprite.x = this.status.x;
+      this.status.sprite.y = this.status.y;
       this.status.sprite.anchor.set(0.5, 0.8);
     }
   }
@@ -84,7 +84,7 @@ export default class Hero {
         case CONSTANTS.SKILL_TARGET_TYPE.SINGLE:
         default:
           return this.status.usingSkill.beforeUse(
-            this,
+            this.status,
             this.status.targetMonster
           );
       }
@@ -121,20 +121,21 @@ export default class Hero {
 
   getNextAction(preUseSkillResult) {
     if (
-      this.status.usingSkill &&
+      this.status.usingSkill !== undefined &&
       (this.action === CONSTANTS.HERO_STATUS.SKILLING ||
         preUseSkillResult === CONSTANTS.SKILL_CHECK_RESULT_TYPE.SUCCESS)
     ) {
       return CONSTANTS.HERO_STATUS.SKILLING;
-    } else if (!this.status.targetMonster) {
+    } else if (this.status.targetMonster === undefined) {
       // Check should attack or walk.
       return CONSTANTS.HERO_STATUS.WALKING;
     } else if (
-      this.status.targetMonster &&
-      getDistUtil(this, this.status.targetMonster) > this.attackRange
+      this.status.targetMonster !== undefined &&
+      getDistUtil(this.status, this.status.targetMonster) >
+        this.status.attackRange
     ) {
-      this.target.x = this.status.targetMonster.x;
-      this.target.y = this.status.targetMonster.y;
+      this.status.target.x = this.status.targetMonster.x;
+      this.status.target.y = this.status.targetMonster.y;
       return CONSTANTS.HERO_STATUS.WALKING;
     }
     return CONSTANTS.HERO_STATUS.ATTACKING;
@@ -147,20 +148,19 @@ export default class Hero {
     }
     this.calculateEffects();
     this.checkAlive();
-    if (!this.alive) {
+    if (!this.status.alive) {
       this.updateTargetMark();
       return;
     }
 
-    const skillsArray = Object.values(this.skillsSet);
+    const skillsArray = Object.values(this.status.skillsSet);
     skillsArray.forEach(sk => sk.update(delta));
 
     const preUseSkillResult = this.getPreUseSkillResult();
-    this.setUsingSkill();
+    this.setUsingSkill(preUseSkillResult);
 
-    const action = this.getNextAction(preUseSkillResult);
-    this.status = new HeroAction().filter(action, this.status, delta);
-
+    this.action = this.getNextAction(preUseSkillResult);
+    this.status = HeroAction.filter(this.action, this.status, delta);
     this.updateImage();
   }
 
@@ -169,28 +169,28 @@ export default class Hero {
       case CONSTANTS.HERO_STATUS.SKILLING:
         break;
       case CONSTANTS.HERO_STATUS.ATTACKING: {
-        this.status.sprite.texture = this.textures[
-          `link_attack_${this.dir}_${this.nowAttackFrame}.png`
+        this.status.sprite.texture = this.status.textures[
+          `link_attack_${this.status.dir}_${this.status.nowAttackFrame}.png`
         ];
 
         // TODO: make this cleaner
-        if (this.nowAttackFrame === 0) {
+        if (this.status.nowAttackFrame === 0) {
           this.status.sprite.anchor.set(0.5, 0.8);
           // this.status.sprite.x = this.x;
           // this.status.sprite.y = this.y;
-        } else if (this.dir === CONSTANTS.DIRECTION.DOWN) {
+        } else if (this.status.dir === CONSTANTS.DIRECTION.DOWN) {
           this.status.sprite.anchor.set(0.5, 0.4);
           // this.status.sprite.x = this.x;
           // this.status.sprite.y = this.y + this.status.sprite.height / 4;
-        } else if (this.dir === CONSTANTS.DIRECTION.LEFT) {
+        } else if (this.status.dir === CONSTANTS.DIRECTION.LEFT) {
           this.status.sprite.anchor.set(0.75, 0.8);
           // this.status.sprite.x = this.x - this.status.sprite.width / 4;
           // this.status.sprite.y = this.y;
-        } else if (this.dir === CONSTANTS.DIRECTION.UP) {
+        } else if (this.status.dir === CONSTANTS.DIRECTION.UP) {
           this.status.sprite.anchor.set(0.5, 0.9);
           // this.status.sprite.x = this.x;
           // this.status.sprite.y = this.y - this.status.sprite.height / 4 ;
-        } else if (this.dir === CONSTANTS.DIRECTION.RIGHT) {
+        } else if (this.status.dir === CONSTANTS.DIRECTION.RIGHT) {
           this.status.sprite.anchor.set(0.25, 0.8);
           // this.status.sprite.x = this.x + this.status.sprite.width / 4;
           // this.status.sprite.y = this.y;
@@ -199,14 +199,14 @@ export default class Hero {
       }
       case CONSTANTS.HERO_STATUS.WALKING:
       default:
-        this.status.sprite.texture = this.textures[
-          `link_face_${this.dir}_${this.nowStepFrame}.png`
+        this.status.sprite.texture = this.status.textures[
+          `link_face_${this.status.dir}_${this.status.nowStepFrame}.png`
         ];
         this.status.sprite.anchor.set(0.5, 0.8);
-        this.status.sprite.x = this.x;
-        this.status.sprite.y = this.y;
-        this.goToTargetMarkSprite.x = this.target.x;
-        this.goToTargetMarkSprite.y = this.target.y;
+        this.status.sprite.x = this.status.x;
+        this.status.sprite.y = this.status.y;
+        this.status.goToTargetMarkSprite.x = this.status.target.x;
+        this.status.goToTargetMarkSprite.y = this.status.target.y;
         break;
     }
     this.updateTargetMark();
@@ -216,26 +216,26 @@ export default class Hero {
   }
 
   getAttackDuration() {
-    return this.attackDuration;
+    return this.status.attackDuration;
   }
   getAttackTimingDelta(delta) {
-    return this.atkSpeedAmp * delta;
+    return this.status.atkSpeedAmp * delta;
   }
 
   getItem(item) {
-    if (!(item.NAME in this.itemsList)) {
-      this.itemsList[item.NAME] = item.GET_OBJ();
-      this.itemsList[item.NAME].setOwner(this);
+    if (!(item.NAME in this.status.itemsList)) {
+      this.status.itemsList[item.NAME] = item.GET_OBJ();
+      this.status.itemsList[item.NAME].setOwner(this);
     }
-    this.itemsList[item.NAME].charge(1);
+    this.status.itemsList[item.NAME].charge(1);
     this.statusDashboard.updateItemsCallBack();
   }
 
   consumeItem(itemName) {
-    if (itemName in this.itemsList) {
-      this.itemsList[itemName].consume(1);
-      if (this.itemsList[itemName].capacity <= 0) {
-        delete this.itemsList[itemName];
+    if (itemName in this.status.itemsList) {
+      this.status.itemsList[itemName].consume(1);
+      if (this.status.itemsList[itemName].capacity <= 0) {
+        delete this.status.itemsList[itemName];
       }
     }
     this.statusDashboard.updateItemsCallBack();

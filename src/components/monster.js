@@ -44,7 +44,7 @@ export default class Monster {
 
   onMouseClick(e) {
     e.stopPropagation();
-    this.hero.targetMonster = this;
+    this.hero.status.targetMonster = this;
   }
 
   calculateEffects() {

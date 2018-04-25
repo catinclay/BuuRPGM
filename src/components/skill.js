@@ -7,9 +7,9 @@ export default class Skill {
     this.skillIconSprite = new PIXI.Sprite();
     this.skillIconSprite.interactive = true;
     this.skillIconSprite.anchor.set(0.5, 0.5);
-    this.hero = args.hero;
+    // this.heroStatus = args.hero;
     // Move to skill-bash.js?
-    this.skillIconSprite.on('pointerdown', this.onSkillClick.bind(this));
+    this.skillIconSprite.on('pointerdown', args.onClick.bind(this, this));
   }
 
   update(delta) {
@@ -32,8 +32,8 @@ export default class Skill {
     }
   }
 
-  beforeUse(sender) {
-    if (sender.mp < this.manaCost) {
+  beforeUse(senderStatus) {
+    if (senderStatus.mp < this.manaCost) {
       return CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOM;
     }
     if (this.cdCounterFrame > 0) {

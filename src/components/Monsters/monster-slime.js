@@ -42,11 +42,12 @@ export default class Slime extends Monster {
   }
 
   attackTargetObject(delta) {
-    if (!this.targetObject.alive) {
+    // console.log(this.targetObject);
+    if (!this.targetObject.status.alive) {
       this.targetObject = undefined;
       return;
     }
-    faceToTargetUtil(this, this.targetObject);
+    faceToTargetUtil(this, this.targetObject.status);
     this.nowAttackTiming += delta;
     if (this.nowAttackTiming < this.attackDuration * 0.4) {
       this.nowAttackFrame = 0;
@@ -54,7 +55,7 @@ export default class Slime extends Monster {
       this.nowAttackFrame = 1;
     } else {
       if (this.nowAttackFrame === 1) {
-        this.targetObject.effects.push(
+        this.targetObject.status.effects.push(
           new Effect({
             sender: this,
             damage: this.batk + getRandomIntUtil(this.fatk),
@@ -76,15 +77,16 @@ export default class Slime extends Monster {
     }
     if (this.aggro === false || this.targetObject === undefined) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
-    } else if (getDistUtil(this, this.targetObject) > this.aggroRange) {
+    } else if (getDistUtil(this, this.targetObject.status) > this.aggroRange) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
       this.aggro = false;
-    } else if (getDistUtil(this, this.targetObject) > this.attackRange) {
+    } else if (getDistUtil(this, this.targetObject.status) > this.attackRange) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
-      goToTargetUtil(this, this.targetObject, this.moveSpeed * delta);
+      goToTargetUtil(this, this.targetObject.status, this.moveSpeed * delta);
     } else {
       this.status = CONSTANTS.MONSTER_STATUS.ATTACKING;
     }
+    // console.log(this.status);
 
     switch (this.status) {
       case CONSTANTS.MONSTER_STATUS.ATTACKING:

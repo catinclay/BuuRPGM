@@ -31,16 +31,16 @@ export default class SkillBash extends Skill {
     this.sprite.displayGroup = args.layer;
   }
 
-  beforeUse(sender, target) {
+  beforeUse(senderStatus, target) {
     if (target === undefined) {
       return CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOT;
     }
 
-    if (getDistUtil(sender, target) > this.range) {
+    if (getDistUtil(senderStatus, target) > this.range) {
       return CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOR;
     }
 
-    return super.beforeUse(sender);
+    return super.beforeUse(senderStatus);
   }
 
   // updateUse(delta, sender, target) {
@@ -83,17 +83,17 @@ export default class SkillBash extends Skill {
   //   this.updateImage(sender, target);
   //   return false;
   // }
-  updateStatus(currentStatus, delta) { 
+  updateStatus(currentStatus, delta) {
     return this.updateImage(this.updateAnimation(currentStatus, delta));
   }
 
-  updateAnimation(currentStatus, delta){
-    let nextStatus = new HeroStatus(currentStatus);
+  updateAnimation(currentStatus, delta) {
+    const nextStatus = new HeroStatus(currentStatus);
     if (this.nowSkillTiming === 0) {
       nextStatus.container.addChild(this.sprite);
       this.sprite.visible = false;
     }
-    this.nowSkillTiming += sender.getAttackTimingDelta(delta);
+    this.nowSkillTiming += nextStatus.atkSpeedAmp * delta;
     if (this.nowSkillTiming < this.skillAnimationDuration * 0.1) {
       this.nowHeroFrame = 0;
     } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.2) {
@@ -113,7 +113,7 @@ export default class SkillBash extends Skill {
         this.cdCounterFrame = this.cooldownFrame;
         nextStatus.targetMonster.effects.push(
           new Effect({
-            sender,
+            nextStatus,
             damage: this.attack,
             aggro: true,
           })
@@ -123,16 +123,18 @@ export default class SkillBash extends Skill {
     } else if (this.nowSkillTiming >= this.skillAnimationDuration) {
       this.nowSkillTiming = 0;
       nextStatus.container.removeChild(this.sprite);
+      nextStatus.usingSkill = undefined;
     }
+    return nextStatus;
   }
 
   updateImage(currentStatus) {
-    let nextStatus = new HeroStatus(currentStatus);
+    const nextStatus = new HeroStatus(currentStatus);
     nextStatus.sprite.texture = this.heroTextures[
-      `link_attack_${sender.dir}_${this.nowHeroFrame}.png`
+      `link_attack_${currentStatus.dir}_${this.nowHeroFrame}.png`
     ];
-    this.sprite.x = target.x;
-    this.sprite.y = target.y;
+    this.sprite.x = nextStatus.target.x;
+    this.sprite.y = nextStatus.target.y;
     this.sprite.texture = this.textures[
       `bash_animation_${this.nowSkillFrame}.png`
     ];
@@ -148,14 +150,14 @@ export default class SkillBash extends Skill {
     } else if (nextStatus.dir === CONSTANTS.DIRECTION.RIGHT) {
       nextStatus.sprite.anchor.set(0.25, 0.8);
     }
-    return nextStatus
+    return nextStatus;
   }
 
   // Move to skill-bash.js
-  onSkillClick(e) {
-    this.hero.usingSkill = this;
-    e.stopPropagation();
-  }
+  // onSkillClick(e) {
+  //   this.heroStatus.usingSkill = this;
+  //   e.stopPropagation();
+  // }
 
   updateIcon() {
     super.updateIcon();
