@@ -23,7 +23,7 @@ export default class StatusDashboard {
     this.hero.statusDashboard = this;
     this.updateItemsCallBack();
 
-    const skillsArray = Object.values(this.hero.status.skillsSet);
+    const skillsArray = Object.values(this.hero.skillStatus.getSkills());
     this.skillIndex = 0;
     skillsArray.forEach(function(sk) {
       const indexX = this.skillIndex % 5;

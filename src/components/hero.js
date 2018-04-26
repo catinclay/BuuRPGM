@@ -1,23 +1,38 @@
-// import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
-// import Effect from './effect';
-// import SkillBash from './Skills/skill-bash';
-import {
-  getDistUtil,
-  // goToTargetUtil,
-  // faceToTargetUtil,
-  // getRandomIntUtil,
-} from '../utils';
+import { getDistUtil } from '../utils';
 import HeroStatus from './Status/hero-status';
+import HeroSkillStatus from './Status/hero-skill-status';
+import HeroEffectStatus from './Status/hero-effect-status';
 import HeroAction from './Actions/hero-action';
+import SkillBash from './Skills/skill-bash';
 
 export default class Hero {
   constructor(args) {
+    const thisHero = this;
     this.consoleLog = args.consoleLog;
-    args.hero = this;
     this.status = new HeroStatus(args);
+    this.skillStatus = new HeroSkillStatus({
+      defaultSkills: [
+        {
+          id: 'bash',
+          skill: new SkillBash({
+            layer: args.upperUiLayer,
+            effectFactory: args.effectFactory,
+            onClick(skill, e) {
+              thisHero.status.usingSkill = skill;
+              e.stopPropagation();
+            },
+          }),
+        },
+      ],
+    });
+    this.effectStatus = new HeroEffectStatus();
     this.action = CONSTANTS.HERO_STATUS.WALKING;
     this.effectFactory = args.effectFactory;
+  }
+
+  getSkillStatus() {
+    return this.skillStatus;
   }
 
   addToContainer(container) {
@@ -42,40 +57,52 @@ export default class Hero {
   }
 
   calculateEffects() {
-    for (let i = 0; i < this.status.effects.length; i += 1) {
-      this.status.effects[i].onEffect(this.status);
-    }
-    this.status.effects = [];
+    this.effectStatus.forEach(effect => effect.onEffect(this.status));
   }
 
-  checkAlive() {
+  resetEffects() {
+    this.effectStatus = new HeroEffectStatus([
+      this.effectFactory.createEffect({
+        sender: this.status,
+        target: this.status,
+        mpRestore: this.status.mpgen,
+        popString: false,
+      }),
+    ]);
+  }
+
+  isAlive() {
     if (this.status.hp <= 0) {
-      this.status.alive = false;
-      this.status.sprite.texture = this.status.textures[`link_dead.png`];
-      this.status.sprite.x = this.status.x;
-      this.status.sprite.y = this.status.y;
-      this.status.sprite.anchor.set(0.5, 0.8);
+      const nextStatus = new HeroStatus(this.status);
+      nextStatus.alive = false;
+      nextStatus.sprite.texture = this.status.textures[`link_dead.png`];
+      nextStatus.sprite.x = this.status.x;
+      nextStatus.sprite.y = this.status.y;
+      nextStatus.sprite.anchor.set(0.5, 0.8);
+      this.updateTargetMark(nextStatus);
+      this.status = nextStatus;
+      return false;
     }
+    return true;
   }
 
-  updateTargetMark() {
-    if (this.status.targetMonster !== undefined) {
-      this.status.clickTargetMarkSprite.x = this.status.targetMonster.sprite.x;
-      this.status.clickTargetMarkSprite.y = this.status.targetMonster.sprite.y;
-      this.status.clickTargetMarkSprite.scale.x =
-        this.status.targetMonster.sprite.width /
-        CONSTANTS.TARGET_MARK_PROP.WIDTH;
-      this.status.clickTargetMarkSprite.scale.y =
-        this.status.targetMonster.sprite.height /
+  updateTargetMark(status) {
+    if (status.targetMonster !== undefined) {
+      status.clickTargetMarkSprite.x = this.status.targetMonster.sprite.x;
+      status.clickTargetMarkSprite.y = this.status.targetMonster.sprite.y;
+      status.clickTargetMarkSprite.scale.x =
+        status.targetMonster.sprite.width / CONSTANTS.TARGET_MARK_PROP.WIDTH;
+      status.clickTargetMarkSprite.scale.y =
+        status.targetMonster.sprite.height /
         CONSTANTS.TARGET_MARK_PROP.HEIGHT *
         0.8;
-      this.status.clickTargetMarkSprite.on(
+      status.clickTargetMarkSprite.on(
         'pointerdown',
         this.taretMarkOnMouseClick.bind(this)
       );
-      this.status.clickTargetMarkSprite.visible = true;
+      status.clickTargetMarkSprite.visible = true;
     } else {
-      this.status.clickTargetMarkSprite.visible = false;
+      status.clickTargetMarkSprite.visible = false;
     }
   }
 
@@ -143,27 +170,24 @@ export default class Hero {
   }
 
   update(delta) {
-    this.mp += this.mpgen * delta;
-    if (this.mp > this.maxMp) {
-      this.mp = this.maxMp;
-    }
     this.calculateEffects();
-    this.checkAlive();
-    if (!this.status.alive) {
-      this.updateTargetMark();
+    this.resetEffects();
+
+    if (!this.isAlive()) {
       return;
     }
 
-    const skillsArray = Object.values(this.status.skillsSet);
-    skillsArray.forEach(sk => sk.update(delta));
+    Object.values(this.skillStatus.getSkills()).forEach(sk => sk.update(delta));
 
     const preUseSkillResult = this.getPreUseSkillResult();
     this.setUsingSkill(preUseSkillResult);
-
     this.action = this.getNextAction(preUseSkillResult);
-    this.status = new HeroAction({
+    this.status = HeroAction.updateStatus({
+      action: this.action,
+      status: this.status,
+      delta,
       effectFactory: this.effectFactory,
-    }).filter(this.action, this.status, delta);
+    });
     this.updateImage();
   }
 
@@ -212,7 +236,7 @@ export default class Hero {
         this.status.goToTargetMarkSprite.y = this.status.target.y;
         break;
     }
-    this.updateTargetMark();
+    this.updateTargetMark(this.status);
 
     this.status.sprite.zOrder =
       -this.status.sprite.y - this.status.sprite.height / 2;

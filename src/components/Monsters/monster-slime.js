@@ -54,7 +54,7 @@ export default class Slime extends Monster {
       this.nowAttackFrame = 1;
     } else {
       if (this.nowAttackFrame <= 1) {
-        this.targetObject.status.effects.push(
+        this.targetObject.effectStatus.push(
           this.effectFactory.createEffect({
             sender: this,
             damage: this.batk + getRandomIntUtil(this.fatk),

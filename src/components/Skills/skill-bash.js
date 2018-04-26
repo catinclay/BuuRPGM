@@ -83,10 +83,10 @@ export default class SkillBash extends Skill {
   //   return false;
   // }
   updateStatus(currentStatus, delta) {
-    return this.updateImage(this.updateAnimation(currentStatus, delta));
+    return this.updateImage(this.processSkill(currentStatus, delta));
   }
 
-  updateAnimation(currentStatus, delta) {
+  processSkill(currentStatus, delta) {
     const nextStatus = new HeroStatus(currentStatus);
     if (this.nowSkillTiming === 0) {
       nextStatus.container.addChild(this.sprite);

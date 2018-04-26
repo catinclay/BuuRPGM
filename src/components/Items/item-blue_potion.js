@@ -18,7 +18,7 @@ export default class BluePotion extends Item {
       return;
     }
     e.stopPropagation();
-    this.owner.status.effects.push(
+    this.owner.effectStatus.push(
       this.effectFactory.createEffect({
         sender: this.owner.status,
         target: this.owner.status,

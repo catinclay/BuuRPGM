@@ -7,7 +7,7 @@ import {
   getRandomIntUtil,
 } from '../../utils';
 
-function useSkill(currentStatus, delta) {
+function cast(currentStatus, delta) {
   switch (currentStatus.usingSkill.targetType) {
     case CONSTANTS.SKILL_TARGET_TYPE.SINGLE:
     default:
@@ -15,7 +15,7 @@ function useSkill(currentStatus, delta) {
   }
 }
 
-function attackMonster(currentStatus, delta, effectFactory) {
+function attack(currentStatus, delta, effectFactory) {
   const nextStatus = new HeroStatus(currentStatus);
   if (!nextStatus.targetMonster.alive) {
     nextStatus.targetMonster = undefined;
@@ -48,7 +48,7 @@ function attackMonster(currentStatus, delta, effectFactory) {
   return nextStatus;
 }
 
-function goToTarget(currentStatus, delta) {
+function move(currentStatus, delta) {
   const nextStatus = new HeroStatus(currentStatus);
   // Reset attack timer.
   nextStatus.nowAttackTiming = 0;
@@ -78,19 +78,18 @@ function goToTarget(currentStatus, delta) {
 }
 
 export default class HeroAction extends Action {
-  filter(action, currentStatus, delta) {
-    let nextStatus = currentStatus;
-    switch (action) {
+  static updateStatus(args) {
+    let nextStatus = args.status;
+    switch (args.action) {
       case CONSTANTS.HERO_STATUS.SKILLING:
-        nextStatus = useSkill(currentStatus, delta, this.effectFactory);
+        nextStatus = cast(args.status, args.delta, args.effectFactory);
         break;
       case CONSTANTS.HERO_STATUS.ATTACKING:
-        nextStatus = attackMonster(currentStatus, delta, this.effectFactory);
-
+        nextStatus = attack(args.status, args.delta, args.effectFactory);
         break;
       case CONSTANTS.HERO_STATUS.WALKING:
       default:
-        nextStatus = goToTarget(currentStatus, delta, this.effectFactory);
+        nextStatus = move(args.status, args.delta, args.effectFactory);
         break;
     }
     return nextStatus;
