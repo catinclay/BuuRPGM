@@ -31,8 +31,20 @@ export default class Hero {
     this.effectFactory = args.effectFactory;
   }
 
-  getSkillStatus() {
-    return this.skillStatus;
+  // getSkillStatus() {
+  //   return this.skillStatus;
+  // }
+
+  getStatus(type) {
+    switch (type) {
+      case CONSTANTS.STATUS_TYPE.SKILL:
+        return this.skillStatus;
+      case CONSTANTS.STATUS_TYPE.EFFECT:
+        return this.effectStatus;
+      case CONSTANTS.STATUS_TYPE.PROP:
+      default:
+        return this.status;
+    }
   }
 
   addToContainer(container) {
@@ -55,11 +67,12 @@ export default class Hero {
   taretMarkOnMouseClick(e) {
     this.status.targetMonster.onMouseClick(e);
   }
-
+  /* TODO: move to private */
   calculateEffects() {
     this.effectStatus.forEach(effect => effect.onEffect(this.status));
   }
 
+  /* TODO: move to private */
   resetEffects() {
     this.effectStatus = new HeroEffectStatus([
       this.effectFactory.createEffect({
@@ -71,6 +84,7 @@ export default class Hero {
     ]);
   }
 
+  /* TODO: move to private */
   isAlive() {
     if (this.status.hp <= 0) {
       const nextStatus = new HeroStatus(this.status);

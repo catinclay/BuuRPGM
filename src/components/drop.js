@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { getDistUtil } from '../utils';
+import CONSTANTS from '../constants';
 
 export default class Drop {
   constructor(args) {
@@ -24,7 +25,9 @@ export default class Drop {
 
   update(delta) {
     if (!this.shouldDelete && !this.isPicked) {
-      if (getDistUtil(this, this.hero.status) < 15) {
+      if (
+        getDistUtil(this, this.hero.getStatus(CONSTANTS.STATUS_TYPE.PROP)) < 15
+      ) {
         this.isPicked = true;
         this.hero.getItem(this.item);
       }

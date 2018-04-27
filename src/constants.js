@@ -45,6 +45,12 @@ const ITEM_TARGET_TYPE = {
   AREA: 2,
 };
 
+const STATUS_TYPE = {
+  PROP: 'STATUS_PROP',
+  SKILL: 'STATUS_SKILL',
+  EFFECT: 'STATUS_EFFECT',
+};
+
 //
 const release = {
   DIRECTION: Object.freeze(DIRECTION),
@@ -55,5 +61,6 @@ const release = {
   SKILL_TARGET_TYPE: Object.freeze(SKILL_TARGET_TYPE),
   SKILL_CHECK_RESULT_TYPE: Object.freeze(SKILL_CHECK_RESULT_TYPE),
   ITEM_TARGET_TYPE: Object.freeze(ITEM_TARGET_TYPE),
+  STATUS_TYPE: Object.freeze(STATUS_TYPE),
 };
 export default Object.freeze(release);
