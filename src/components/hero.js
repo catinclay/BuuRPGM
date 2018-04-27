@@ -2,6 +2,7 @@ import CONSTANTS from '../constants';
 import { getDistUtil } from '../utils';
 import HeroStatus from './Status/hero-status';
 import HeroSkillStatus from './Status/hero-skill-status';
+import HeroAnimationStatus from './Status/hero-animation-status';
 import HeroEffectStatus from './Status/hero-effect-status';
 import HeroAction from './Actions/hero-action';
 import SkillBash from './Skills/skill-bash';
@@ -10,6 +11,7 @@ export default class Hero {
   constructor(args) {
     const thisHero = this;
     this.consoleLog = args.consoleLog;
+    //
     this.status = new HeroStatus(args);
     this.skillStatus = new HeroSkillStatus({
       defaultSkills: [
@@ -27,14 +29,23 @@ export default class Hero {
       ],
     });
     this.effectStatus = new HeroEffectStatus();
+    this.animationStatus = new HeroAnimationStatus({
+      battleLayer: args.battleLayer,
+      upperUiLayer: args.upperUiLayer,
+      x: this.status.x,
+      y: this.status.y,
+    });
+    //
     this.action = CONSTANTS.HERO_STATUS.WALKING;
     this.effectFactory = args.effectFactory;
   }
-
-  // getSkillStatus() {
-  //   return this.skillStatus;
-  // }
-
+  /* GETTER */
+  getAttackDuration() {
+    return this.status.attackDuration;
+  }
+  getAttackTimingDelta(delta) {
+    return this.status.atkSpeedAmp * delta;
+  }
   getStatus(type) {
     switch (type) {
       case CONSTANTS.STATUS_TYPE.SKILL:
@@ -46,19 +57,51 @@ export default class Hero {
         return this.status;
     }
   }
+  /* ANIMATION */
 
   addToContainer(container) {
-    this.status.container.addChild(this.status.goToTargetMarkSprite);
-    this.status.container.addChild(this.status.clickTargetMarkSprite);
-    this.status.container.addChild(this.status.sprite);
-    container.addChild(this.status.container);
+    this.animationStatus.appendToContainer(container);
   }
 
+  updateTargetMark(propStatus) {
+    if (propStatus.targetMonster !== undefined) {
+      this.animationStatus.setTargetMark(this.status.targetMonster.sprite, {
+        name: 'pointerdown',
+        listener: this.taretMarkOnMouseClick.bind(this),
+      });
+    } else {
+      this.animationStatus.hideTargetMark();
+    }
+  }
+
+  updateSprite() {
+    switch (this.action) {
+      case CONSTANTS.HERO_STATUS.SKILLING:
+        break;
+      case CONSTANTS.HERO_STATUS.ATTACKING:
+        this.animationStatus.updateAttackingSprite(this.status.dir);
+        break;
+      case CONSTANTS.HERO_STATUS.WALKING:
+      default:
+        this.animationStatus.updateWalkingSprite(
+          this.status.x,
+          this.status.y,
+          this.status.dir
+        );
+        break;
+    }
+  }
+
+  updateImage() {
+    this.updateSprite();
+    this.updateTargetMark(this.status);
+    this.animationStatus.updateSpriteZOrder();
+  }
+  /* EVENT */
   onClickGround(args) {
     if (this.action !== CONSTANTS.HERO_STATUS.SKILLING) {
       this.status.usingSkill = undefined;
-      this.status.target.x = args.x;
-      this.status.target.y = args.y;
+      this.animationStatus.setMoveAnchorCoord(args.x, args.y);
       this.status.targetMonster = undefined;
       this.action = CONSTANTS.HERO_STATUS.WALKING;
     }
@@ -67,6 +110,7 @@ export default class Hero {
   taretMarkOnMouseClick(e) {
     this.status.targetMonster.onMouseClick(e);
   }
+  /* EFFECT */
   /* TODO: move to private */
   calculateEffects() {
     this.effectStatus.forEach(effect => effect.onEffect(this.status));
@@ -84,42 +128,7 @@ export default class Hero {
     ]);
   }
 
-  /* TODO: move to private */
-  isAlive() {
-    if (this.status.hp <= 0) {
-      const nextStatus = new HeroStatus(this.status);
-      nextStatus.alive = false;
-      nextStatus.sprite.texture = this.status.textures[`link_dead.png`];
-      nextStatus.sprite.x = this.status.x;
-      nextStatus.sprite.y = this.status.y;
-      nextStatus.sprite.anchor.set(0.5, 0.8);
-      this.updateTargetMark(nextStatus);
-      this.status = nextStatus;
-      return false;
-    }
-    return true;
-  }
-
-  updateTargetMark(status) {
-    if (status.targetMonster !== undefined) {
-      status.clickTargetMarkSprite.x = this.status.targetMonster.sprite.x;
-      status.clickTargetMarkSprite.y = this.status.targetMonster.sprite.y;
-      status.clickTargetMarkSprite.scale.x =
-        status.targetMonster.sprite.width / CONSTANTS.TARGET_MARK_PROP.WIDTH;
-      status.clickTargetMarkSprite.scale.y =
-        status.targetMonster.sprite.height /
-        CONSTANTS.TARGET_MARK_PROP.HEIGHT *
-        0.8;
-      status.clickTargetMarkSprite.on(
-        'pointerdown',
-        this.taretMarkOnMouseClick.bind(this)
-      );
-      status.clickTargetMarkSprite.visible = true;
-    } else {
-      status.clickTargetMarkSprite.visible = false;
-    }
-  }
-
+  /* SKILL */
   getPreUseSkillResult() {
     if (this.status.usingSkill !== undefined) {
       switch (this.status.usingSkill.targetType) {
@@ -161,6 +170,19 @@ export default class Hero {
     }
   }
 
+  /* ACTION */
+  /* TODO: move to private */
+  isAlive() {
+    if (this.status.hp <= 0) {
+      const nextStatus = new HeroStatus(this.status);
+      nextStatus.alive = false;
+      this.animationStatus.setDeadSprite(nextStatus.x, nextStatus.y);
+      this.updateTargetMark(nextStatus);
+      this.status = nextStatus;
+      return false;
+    }
+    return true;
+  }
   getNextAction(preUseSkillResult) {
     if (
       this.status.usingSkill !== undefined &&
@@ -176,8 +198,10 @@ export default class Hero {
       getDistUtil(this.status, this.status.targetMonster) >
         this.status.attackRange
     ) {
-      this.status.target.x = this.status.targetMonster.x;
-      this.status.target.y = this.status.targetMonster.y;
+      this.animationStatus.setMoveAnchorCoord(
+        this.status.targetMonster.x,
+        this.status.targetMonster.y
+      );
       return CONSTANTS.HERO_STATUS.WALKING;
     }
     return CONSTANTS.HERO_STATUS.ATTACKING;
@@ -199,70 +223,14 @@ export default class Hero {
     this.status = HeroAction.updateStatus({
       action: this.action,
       status: this.status,
+      animationStatus: this.animationStatus,
       delta,
       effectFactory: this.effectFactory,
     });
     this.updateImage();
   }
 
-  updateImage() {
-    switch (this.action) {
-      case CONSTANTS.HERO_STATUS.SKILLING:
-        break;
-      case CONSTANTS.HERO_STATUS.ATTACKING: {
-        this.status.sprite.texture = this.status.textures[
-          `link_attack_${this.status.dir}_${this.status.nowAttackFrame}.png`
-        ];
-
-        // TODO: make this cleaner
-        if (this.status.nowAttackFrame === 0) {
-          this.status.sprite.anchor.set(0.5, 0.8);
-          // this.status.sprite.x = this.x;
-          // this.status.sprite.y = this.y;
-        } else if (this.status.dir === CONSTANTS.DIRECTION.DOWN) {
-          this.status.sprite.anchor.set(0.5, 0.4);
-          // this.status.sprite.x = this.x;
-          // this.status.sprite.y = this.y + this.status.sprite.height / 4;
-        } else if (this.status.dir === CONSTANTS.DIRECTION.LEFT) {
-          this.status.sprite.anchor.set(0.75, 0.8);
-          // this.status.sprite.x = this.x - this.status.sprite.width / 4;
-          // this.status.sprite.y = this.y;
-        } else if (this.status.dir === CONSTANTS.DIRECTION.UP) {
-          this.status.sprite.anchor.set(0.5, 0.9);
-          // this.status.sprite.x = this.x;
-          // this.status.sprite.y = this.y - this.status.sprite.height / 4 ;
-        } else if (this.status.dir === CONSTANTS.DIRECTION.RIGHT) {
-          this.status.sprite.anchor.set(0.25, 0.8);
-          // this.status.sprite.x = this.x + this.status.sprite.width / 4;
-          // this.status.sprite.y = this.y;
-        }
-        break;
-      }
-      case CONSTANTS.HERO_STATUS.WALKING:
-      default:
-        this.status.sprite.texture = this.status.textures[
-          `link_face_${this.status.dir}_${this.status.nowStepFrame}.png`
-        ];
-        this.status.sprite.anchor.set(0.5, 0.8);
-        this.status.sprite.x = this.status.x;
-        this.status.sprite.y = this.status.y;
-        this.status.goToTargetMarkSprite.x = this.status.target.x;
-        this.status.goToTargetMarkSprite.y = this.status.target.y;
-        break;
-    }
-    this.updateTargetMark(this.status);
-
-    this.status.sprite.zOrder =
-      -this.status.sprite.y - this.status.sprite.height / 2;
-  }
-
-  getAttackDuration() {
-    return this.status.attackDuration;
-  }
-  getAttackTimingDelta(delta) {
-    return this.status.atkSpeedAmp * delta;
-  }
-
+  /* ITEM */
   getItem(item) {
     if (!(item.NAME in this.status.itemsList)) {
       this.status.itemsList[item.NAME] = item.GET_OBJ({

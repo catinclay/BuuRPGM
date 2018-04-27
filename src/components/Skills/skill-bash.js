@@ -82,14 +82,19 @@ export default class SkillBash extends Skill {
   //   this.updateImage(sender, target);
   //   return false;
   // }
-  updateStatus(currentStatus, delta) {
-    return this.updateImage(this.processSkill(currentStatus, delta));
+  updateStatus(propStatus, animationStatus, delta) {
+    const nextPropStatus = this.processSkill(
+      propStatus,
+      animationStatus,
+      delta
+    );
+    return this.updateImage(nextPropStatus, animationStatus);
   }
 
-  processSkill(currentStatus, delta) {
+  processSkill(currentStatus, animationStatus, delta) {
     const nextStatus = new HeroStatus(currentStatus);
     if (this.nowSkillTiming === 0) {
-      nextStatus.container.addChild(this.sprite);
+      animationStatus.addContainerChild(this.sprite);
       this.sprite.visible = false;
     }
     this.nowSkillTiming += nextStatus.atkSpeedAmp * delta;
@@ -125,35 +130,40 @@ export default class SkillBash extends Skill {
       this.nowSkillFrame = 2;
     } else if (this.nowSkillTiming >= this.skillAnimationDuration) {
       this.nowSkillTiming = 0;
-      nextStatus.container.removeChild(this.sprite);
+      animationStatus.removeContainerChild(this.sprite);
       nextStatus.usingSkill = undefined;
     }
     return nextStatus;
   }
 
-  updateImage(currentStatus) {
-    const nextStatus = new HeroStatus(currentStatus);
-    nextStatus.sprite.texture = this.heroTextures[
-      `link_attack_${currentStatus.dir}_${this.nowHeroFrame}.png`
-    ];
-    this.sprite.x = nextStatus.target.x;
-    this.sprite.y = nextStatus.target.y;
+  updateImage(nextPropStatus, animationStatus) {
+    //
+    const textureKey = `link_attack_${nextPropStatus.dir}_${
+      this.nowHeroFrame
+    }.png`;
+    const texture = this.heroTextures[textureKey];
+    animationStatus.setSpriteTexture(texture);
+    //
+    const moveAnchorCoord = animationStatus.getMoveAnchorCoord();
+    this.sprite.x = moveAnchorCoord.x;
+    this.sprite.y = moveAnchorCoord.y;
     this.sprite.texture = this.textures[
       `bash_animation_${this.nowSkillFrame}.png`
     ];
+    //
     // TODO: make this cleaner
     if (this.nowHeroFrame === 0) {
-      nextStatus.sprite.anchor.set(0.5, 0.8);
-    } else if (nextStatus.dir === CONSTANTS.DIRECTION.DOWN) {
-      nextStatus.sprite.anchor.set(0.5, 0.4);
-    } else if (nextStatus.dir === CONSTANTS.DIRECTION.LEFT) {
-      nextStatus.sprite.anchor.set(0.75, 0.8);
-    } else if (nextStatus.dir === CONSTANTS.DIRECTION.UP) {
-      nextStatus.sprite.anchor.set(0.5, 0.9);
-    } else if (nextStatus.dir === CONSTANTS.DIRECTION.RIGHT) {
-      nextStatus.sprite.anchor.set(0.25, 0.8);
+      animationStatus.getSprite().anchor.set(0.5, 0.8);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.DOWN) {
+      animationStatus.getSprite().anchor.set(0.5, 0.4);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.LEFT) {
+      animationStatus.getSprite().anchor.set(0.75, 0.8);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.UP) {
+      animationStatus.getSprite().anchor.set(0.5, 0.9);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.RIGHT) {
+      animationStatus.getSprite().anchor.set(0.25, 0.8);
     }
-    return nextStatus;
+    return nextPropStatus;
   }
 
   // Move to skill-bash.js
