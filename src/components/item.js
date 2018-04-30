@@ -26,8 +26,12 @@ export default class Item {
     this.capacity += number;
   }
 
-  consume(number) {
-    this.capacity -= number;
+  consume(number = 1) {
+    if (this.capacity >= number) {
+      this.capacity -= number;
+      return true;
+    }
+    return false;
   }
 
   setXY(x, y) {

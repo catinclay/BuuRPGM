@@ -18,14 +18,12 @@ export default class RedPotion extends Item {
       return;
     }
     e.stopPropagation();
-    this.owner.effectStatus.push(
-      this.effectFactory.createEffect({
-        sender: this.owner.status,
-        target: this.owner.status,
-        heal: ITEMS.RED_POTION.HEAL,
-      })
-    );
-    this.owner.consumeItem(this.name);
+    const effect = this.effectFactory.createEffect({
+      sender: this.owner.status,
+      target: this.owner.status,
+      heal: ITEMS.RED_POTION.HEAL,
+    });
+    this.owner.consumeItem(this.name, effect);
   }
 
   setOwner(owner) {

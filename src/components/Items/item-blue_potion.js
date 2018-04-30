@@ -18,14 +18,12 @@ export default class BluePotion extends Item {
       return;
     }
     e.stopPropagation();
-    this.owner.effectStatus.push(
-      this.effectFactory.createEffect({
-        sender: this.owner.status,
-        target: this.owner.status,
-        mpRestore: ITEMS.BLUE_POTION.MP_RESTORE,
-      })
-    );
-    this.owner.consumeItem(this.name);
+    const effect = this.effectFactory.createEffect({
+      sender: this.owner.status,
+      target: this.owner.status,
+      mpRestore: ITEMS.BLUE_POTION.MP_RESTORE,
+    });
+    this.owner.consumeItem(this.name, effect);
   }
 
   setOwner(owner) {

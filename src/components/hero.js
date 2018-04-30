@@ -4,6 +4,7 @@ import HeroStatus from './Status/hero-status';
 import HeroSkillStatus from './Status/hero-skill-status';
 import HeroAnimationStatus from './Status/hero-animation-status';
 import HeroEffectStatus from './Status/hero-effect-status';
+import HeroItemStatus from './Status/hero-item-status';
 import HeroAction from './Actions/hero-action';
 import SkillBash from './Skills/skill-bash';
 
@@ -38,6 +39,8 @@ export default class Hero {
     //
     this.action = CONSTANTS.HERO_STATUS.WALKING;
     this.effectFactory = args.effectFactory;
+    //
+    this.itemStatus = new HeroItemStatus();
   }
   /* GETTER */
   getAttackDuration() {
@@ -52,6 +55,8 @@ export default class Hero {
         return this.skillStatus;
       case CONSTANTS.STATUS_TYPE.EFFECT:
         return this.effectStatus;
+      case CONSTANTS.STATUS_TYPE.ITEM:
+        return this.itemStatus;
       case CONSTANTS.STATUS_TYPE.PROP:
       default:
         return this.status;
@@ -232,22 +237,15 @@ export default class Hero {
 
   /* ITEM */
   getItem(item) {
-    if (!(item.NAME in this.status.itemsList)) {
-      this.status.itemsList[item.NAME] = item.GET_OBJ({
-        effectFactory: this.effectFactory,
-      });
-      this.status.itemsList[item.NAME].setOwner(this);
+    if (!this.itemStatus.hasItem(item.name)) {
+      this.itemStatus.addItem(item, this, this.effectFactory);
     }
-    this.status.itemsList[item.NAME].charge(1);
     this.statusDashboard.updateItemsCallBack();
   }
 
-  consumeItem(itemName) {
-    if (itemName in this.status.itemsList) {
-      this.status.itemsList[itemName].consume(1);
-      if (this.status.itemsList[itemName].capacity <= 0) {
-        delete this.status.itemsList[itemName];
-      }
+  consumeItem(itemName, effect) {
+    if (this.itemStatus.consume(itemName)) {
+      this.effectStatus.push(effect);
     }
     this.statusDashboard.updateItemsCallBack();
   }

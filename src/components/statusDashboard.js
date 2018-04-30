@@ -88,7 +88,7 @@ export default class StatusDashboard {
 
   updateItemsCallBack() {
     this.itemContainer.removeChildren();
-    const itemsArray = Object.values(this.hero.status.itemsList);
+    const itemsArray = Object.values(this.hero.itemStatus.getItems());
     let itemIndex = 0;
     itemsArray.forEach(function(item) {
       const indexX = itemIndex % 5;

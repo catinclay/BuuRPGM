@@ -8,9 +8,7 @@ export default class HeroEffectStatus extends Status {
     this[effects] = [];
     if (Array.isArray(args)) {
       args.forEach(e => {
-        if (e instanceof Effect) {
-          this.push(e);
-        }
+        this.push(e);
       });
     }
   }
@@ -22,7 +20,9 @@ export default class HeroEffectStatus extends Status {
   }
 
   push(effect) {
-    this[effects].push(effect);
+    if (effect instanceof Effect) {
+      this[effects].push(effect);
+    }
   }
 
   reset() {
