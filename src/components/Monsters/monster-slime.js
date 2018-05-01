@@ -37,15 +37,18 @@ export default class Slime extends Monster {
     this.aggro = false;
     this.hp = this.maxHp;
     this.alive = true;
-    this.targetObject = this.hero;
+    this.targetObject = this.target;
   }
 
   attackTargetObject(delta) {
-    if (!this.targetObject.alive) {
+    // console.log(this.targetObject);
+    const targetStatus = this.getTargetStatus(CONSTANTS.STATUS_TYPE.PROP);
+
+    if (!targetStatus.alive) {
       this.targetObject = undefined;
       return;
     }
-    faceToTargetUtil(this, this.targetObject);
+    faceToTargetUtil(this, targetStatus);
     this.nowAttackTiming += delta;
     if (this.nowAttackTiming < this.attackDuration * 0.4) {
       this.nowAttackFrame = 0;
@@ -53,7 +56,7 @@ export default class Slime extends Monster {
       this.nowAttackFrame = 1;
     } else {
       if (this.nowAttackFrame <= 1) {
-        this.targetObject.effects.push(
+        this.getTargetStatus(CONSTANTS.STATUS_TYPE.EFFECT).push(
           this.effectFactory.createEffect({
             sender: this,
             damage: this.batk + getRandomIntUtil(this.fatk),
@@ -74,17 +77,22 @@ export default class Slime extends Monster {
     if (!this.alive) {
       return;
     }
+
+    const targetStatus = this.getTargetStatus(CONSTANTS.STATUS_TYPE.PROP);
+    const dist = getDistUtil(this, targetStatus);
+
     if (this.aggro === false || this.targetObject === undefined) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
-    } else if (getDistUtil(this, this.targetObject) > this.aggroRange) {
+    } else if (dist > this.aggroRange) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
       this.aggro = false;
-    } else if (getDistUtil(this, this.targetObject) > this.attackRange) {
+    } else if (dist > this.attackRange) {
       this.status = CONSTANTS.MONSTER_STATUS.WALKING;
-      goToTargetUtil(this, this.targetObject, this.moveSpeed * delta);
+      goToTargetUtil(this, targetStatus, this.moveSpeed * delta);
     } else {
       this.status = CONSTANTS.MONSTER_STATUS.ATTACKING;
     }
+    // console.log(this.status);
 
     switch (this.status) {
       case CONSTANTS.MONSTER_STATUS.ATTACKING:

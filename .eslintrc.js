@@ -23,5 +23,6 @@ module.exports = {
       "aspects": [ "noHref", "invalidHref", "preferButton" ],
     }],
     "no-param-reassign": [2, { "props": false }],
+    "enforceInMethodNames": true 
   },
 };

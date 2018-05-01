@@ -4,6 +4,7 @@ export default class Effect {
   constructor(args) {
     // Setup
     Object.assign(this, args);
+    this.popString = this.popString === undefined ? true : this.popString;
   }
 
   onEffect(target) {
@@ -15,23 +16,27 @@ export default class Effect {
           (target.armor + CONSTANTS.BATTLE_CONSTANTS.ARMOR_BASE));
       target.hp -= actualDamage;
       const color = this.color === undefined ? 0x993333 : this.color;
-      this.popEffectString({
-        text: actualDamage,
-        x: target.x,
-        y: target.y,
-        color,
-      });
+      if (this.popString) {
+        this.popEffectString({
+          text: actualDamage,
+          x: target.x,
+          y: target.y,
+          color,
+        });
+      }
     }
 
     if (this.heal !== undefined) {
       const actualHeal = Math.min(this.heal, target.maxHp - target.hp);
       target.hp += actualHeal;
-      this.popEffectString({
-        text: Math.floor(actualHeal),
-        x: target.x,
-        y: target.y,
-        color: '0x33DD33',
-      });
+      if (this.popString) {
+        this.popEffectString({
+          text: Math.floor(actualHeal),
+          x: target.x,
+          y: target.y,
+          color: '0x33DD33',
+        });
+      }
     }
 
     if (this.mpRestore !== undefined) {
@@ -40,12 +45,14 @@ export default class Effect {
         target.maxMp - target.mp
       );
       target.mp += actualMpRestore;
-      this.popEffectString({
-        text: Math.floor(actualMpRestore),
-        x: target.x,
-        y: target.y,
-        color: '0x333399',
-      });
+      if (this.popString) {
+        this.popEffectString({
+          text: Math.floor(actualMpRestore),
+          x: target.x,
+          y: target.y,
+          color: '0x333399',
+        });
+      }
     }
 
     // Aggro

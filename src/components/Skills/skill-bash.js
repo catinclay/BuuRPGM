@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import CONSTANTS from '../../constants';
 import Skill from '../skill';
 import { getDistUtil, getRandomIntUtil } from '../../utils';
+import HeroStatus from '../Status/hero-status';
 
 export default class SkillBash extends Skill {
   constructor(args) {
@@ -29,24 +30,74 @@ export default class SkillBash extends Skill {
     this.sprite.displayGroup = args.layer;
   }
 
-  beforeUse(sender, target) {
+  beforeUse(senderStatus, target) {
     if (target === undefined) {
       return CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOT;
     }
 
-    if (getDistUtil(sender, target) > this.range) {
+    if (getDistUtil(senderStatus, target) > this.range) {
       return CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOR;
     }
 
-    return super.beforeUse(sender);
+    return super.beforeUse(senderStatus);
   }
 
-  updateUse(delta, sender, target) {
+  // updateUse(delta, sender, target) {
+  //   if (this.nowSkillTiming === 0) {
+  //     sender.container.addChild(this.sprite);
+  //     this.sprite.visible = false;
+  //   }
+  //   this.nowSkillTiming += delta;
+  //   if (this.nowSkillTiming < this.skillAnimationDuration * 0.1) {
+  //     this.nowHeroFrame = 0;
+  //   } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.2) {
+  //     this.nowHeroFrame = 1;
+  //   } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.25) {
+  //     this.nowHeroFrame = 2;
+  //   } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.3) {
+  //     this.nowHeroFrame = 0;
+  //   } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.7) {
+  //     this.sprite.visible = true;
+  //     this.nowSkillFrame = 0;
+  //   } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.8) {
+  //     this.nowSkillFrame = 1;
+  //   } else if (this.nowSkillTiming < this.skillAnimationDuration) {
+  //     if (this.nowSkillFrame === 1) {
+  //       sender.mp -= this.manaCost;
+  //       this.cdCounterFrame = this.cooldownFrame;
+  //       target.effects.push(
+  //         new Effect({
+  //           sender,
+  //           damage: this.attack,
+  //           aggro: true,
+  //         })
+  //       );
+  //     }
+  //     this.nowSkillFrame = 2;
+  //   } else if (this.nowSkillTiming >= this.skillAnimationDuration) {
+  //     this.nowSkillTiming = 0;
+  //     sender.container.removeChild(this.sprite);
+  //     return true;
+  //   }
+  //   this.updateImage(sender, target);
+  //   return false;
+  // }
+  updateStatus(propStatus, animationStatus, delta) {
+    const nextPropStatus = this.processSkill(
+      propStatus,
+      animationStatus,
+      delta
+    );
+    return this.updateImage(nextPropStatus, animationStatus);
+  }
+
+  processSkill(currentStatus, animationStatus, delta) {
+    const nextStatus = new HeroStatus(currentStatus);
     if (this.nowSkillTiming === 0) {
-      sender.container.addChild(this.sprite);
+      animationStatus.addContainerChild(this.sprite);
       this.sprite.visible = false;
     }
-    this.nowSkillTiming += sender.getAttackTimingDelta(delta);
+    this.nowSkillTiming += nextStatus.atkSpeedAmp * delta;
     if (this.nowSkillTiming < this.skillAnimationDuration * 0.1) {
       this.nowHeroFrame = 0;
     } else if (this.nowSkillTiming < this.skillAnimationDuration * 0.2) {
@@ -62,13 +113,15 @@ export default class SkillBash extends Skill {
       this.nowSkillFrame = 1;
     } else if (this.nowSkillTiming < this.skillAnimationDuration) {
       if (this.nowSkillFrame <= 1) {
-        sender.mp -= this.manaCost;
+        nextStatus.mp -= this.manaCost;
         this.cdCounterFrame = this.cooldownFrame;
-        target.effects.push(
+        nextStatus.targetMonster.effects.push(
           this.effectFactory.createEffect({
-            sender,
+            nextStatus,
             damage:
-              this.attack + 2 * sender.batk + getRandomIntUtil(2 * sender.fatk),
+              this.attack +
+              2 * nextStatus.batk +
+              getRandomIntUtil(2 * nextStatus.fatk),
             aggro: true,
             color: 0xffff33,
           })
@@ -77,41 +130,47 @@ export default class SkillBash extends Skill {
       this.nowSkillFrame = 2;
     } else if (this.nowSkillTiming >= this.skillAnimationDuration) {
       this.nowSkillTiming = 0;
-      sender.container.removeChild(this.sprite);
-      return true;
+      animationStatus.removeContainerChild(this.sprite);
+      nextStatus.usingSkill = undefined;
     }
-    this.updateImage(sender, target);
-    return false;
+    return nextStatus;
   }
 
-  updateImage(sender, target) {
-    sender.sprite.texture = this.heroTextures[
-      `link_attack_${sender.dir}_${this.nowHeroFrame}.png`
-    ];
-    this.sprite.x = target.x;
-    this.sprite.y = target.y;
+  updateImage(nextPropStatus, animationStatus) {
+    //
+    const textureKey = `link_attack_${nextPropStatus.dir}_${
+      this.nowHeroFrame
+    }.png`;
+    const texture = this.heroTextures[textureKey];
+    animationStatus.setSpriteTexture(texture);
+    //
+    const moveAnchorCoord = animationStatus.getMoveAnchorCoord();
+    this.sprite.x = moveAnchorCoord.x;
+    this.sprite.y = moveAnchorCoord.y;
     this.sprite.texture = this.textures[
       `bash_animation_${this.nowSkillFrame}.png`
     ];
+    //
     // TODO: make this cleaner
     if (this.nowHeroFrame === 0) {
-      sender.sprite.anchor.set(0.5, 0.8);
-    } else if (sender.dir === CONSTANTS.DIRECTION.DOWN) {
-      sender.sprite.anchor.set(0.5, 0.4);
-    } else if (sender.dir === CONSTANTS.DIRECTION.LEFT) {
-      sender.sprite.anchor.set(0.75, 0.8);
-    } else if (sender.dir === CONSTANTS.DIRECTION.UP) {
-      sender.sprite.anchor.set(0.5, 0.9);
-    } else if (sender.dir === CONSTANTS.DIRECTION.RIGHT) {
-      sender.sprite.anchor.set(0.25, 0.8);
+      animationStatus.getSprite().anchor.set(0.5, 0.8);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.DOWN) {
+      animationStatus.getSprite().anchor.set(0.5, 0.4);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.LEFT) {
+      animationStatus.getSprite().anchor.set(0.75, 0.8);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.UP) {
+      animationStatus.getSprite().anchor.set(0.5, 0.9);
+    } else if (nextPropStatus.dir === CONSTANTS.DIRECTION.RIGHT) {
+      animationStatus.getSprite().anchor.set(0.25, 0.8);
     }
+    return nextPropStatus;
   }
 
   // Move to skill-bash.js
-  onSkillClick(e) {
-    this.hero.usingSkill = this;
-    e.stopPropagation();
-  }
+  // onSkillClick(e) {
+  //   this.heroStatus.usingSkill = this;
+  //   e.stopPropagation();
+  // }
 
   updateIcon() {
     super.updateIcon();

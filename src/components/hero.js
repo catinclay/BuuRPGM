@@ -1,260 +1,170 @@
-import * as PIXI from 'pixi.js';
 import CONSTANTS from '../constants';
+import { getDistUtil } from '../utils';
+import HeroStatus from './Status/hero-status';
+import HeroSkillStatus from './Status/hero-skill-status';
+import HeroAnimationStatus from './Status/hero-animation-status';
+import HeroEffectStatus from './Status/hero-effect-status';
+import HeroItemStatus from './Status/hero-item-status';
+import HeroAction from './Actions/hero-action';
 import SkillBash from './Skills/skill-bash';
-import {
-  getDistUtil,
-  goToTargetUtil,
-  faceToTargetUtil,
-  getRandomIntUtil,
-} from '../utils';
 
 export default class Hero {
   constructor(args) {
+    const thisHero = this;
     this.consoleLog = args.consoleLog;
-
-    // Setup
-    this.x = args.x;
-    this.y = args.y;
-    this.dir = args.dir;
-
-    this.textures = PIXI.loader.resources['assets/images/link.json'].textures;
-    this.sprite = new PIXI.Sprite(
-      PIXI.loader.resources['assets/images/link.json'].textures[
-        `link_face_${this.dir}_0.png`
-      ]
-    );
-    this.sprite.anchor.set(0.5, 0.8);
-    this.sprite.interactive = false;
-    this.goToTargetMarkSprite = new PIXI.Sprite(
-      PIXI.loader.resources['assets/images/control_unit.json'].textures[
-        `go_to_target_mark.png`
-      ]
-    );
-    this.goToTargetMarkSprite.visible = false;
-    this.goToTargetMarkSprite.anchor.set(0.5);
-    this.clickTargetMarkSprite = new PIXI.Sprite(
-      PIXI.loader.resources['assets/images/control_unit.json'].textures[
-        `click_target_mark.png`
-      ]
-    );
-    this.clickTargetMarkSprite.visible = false;
-    this.clickTargetMarkSprite.anchor.set(0.5);
-    this.clickTargetMarkSprite.interactive = true;
-    this.container = new PIXI.Container();
-    this.container.interactive = false;
-
-    this.stepCounter = 0;
-    this.nowStepFrame = 0;
-    this.target = { x: this.x, y: this.y };
-    this.moveSpeed = 2;
-    this.attackRange = 30;
-    this.status = CONSTANTS.HERO_STATUS.WALKING;
-    this.nowAttackFrame = 0;
-    this.nowAttackTiming = 0;
-
-    // Battle variable
-    this.attackDuration = 60; // 1 sec per attack
-    this.atkSpeedAmp = 1;
-    this.batk = 5;
-    this.fatk = 8;
-    this.alive = true;
-    this.effects = [];
-    this.maxHp = 150;
-    this.maxMp = 50;
-    this.hp = this.maxHp;
-    this.mp = this.maxMp;
-    this.armor = 0;
-    this.mpgen = 1.5 / 60;
-
-    // Layers
-    this.goToTargetMarkSprite.displayGroup = args.battleLayer;
-    this.sprite.displayGroup = args.battleLayer;
-    this.clickTargetMarkSprite.displayGroup = args.upperUiLayer;
-
-    // Effects
-    this.effectFactory = args.effectFactory;
-
-    // Skills
-    this.skillsSet = {};
-    this.skillsSet.bash = new SkillBash({
-      layer: args.upperUiLayer,
-      hero: this,
-      effectFactory: this.effectFactory,
+    //
+    this.status = new HeroStatus(args);
+    this.skillStatus = new HeroSkillStatus({
+      defaultSkills: [
+        {
+          id: 'bash',
+          skill: new SkillBash({
+            layer: args.upperUiLayer,
+            effectFactory: args.effectFactory,
+            onClick(skill, e) {
+              thisHero.status.usingSkill = skill;
+              e.stopPropagation();
+            },
+          }),
+        },
+      ],
     });
-
-    // Items
-    this.itemsList = {};
+    this.effectStatus = new HeroEffectStatus();
+    this.animationStatus = new HeroAnimationStatus({
+      battleLayer: args.battleLayer,
+      upperUiLayer: args.upperUiLayer,
+      x: this.status.x,
+      y: this.status.y,
+    });
+    //
+    this.action = CONSTANTS.HERO_STATUS.WALKING;
+    this.effectFactory = args.effectFactory;
+    //
+    this.itemStatus = new HeroItemStatus();
   }
+  /* GETTER */
+  getAttackDuration() {
+    return this.status.attackDuration;
+  }
+  getAttackTimingDelta(delta) {
+    return this.status.atkSpeedAmp * delta;
+  }
+  getStatus(type) {
+    switch (type) {
+      case CONSTANTS.STATUS_TYPE.SKILL:
+        return this.skillStatus;
+      case CONSTANTS.STATUS_TYPE.EFFECT:
+        return this.effectStatus;
+      case CONSTANTS.STATUS_TYPE.ITEM:
+        return this.itemStatus;
+      case CONSTANTS.STATUS_TYPE.PROP:
+      default:
+        return this.status;
+    }
+  }
+  /* ANIMATION */
 
   addToContainer(container) {
-    this.container.addChild(this.goToTargetMarkSprite);
-    this.container.addChild(this.clickTargetMarkSprite);
-    this.container.addChild(this.sprite);
-    container.addChild(this.container);
+    this.animationStatus.appendToContainer(container);
   }
 
-  onClickGround(args) {
-    if (this.status !== CONSTANTS.HERO_STATUS.SKILLING) {
-      this.usingSkill = undefined;
-      this.target.x = args.x;
-      this.target.y = args.y;
-      this.targetMonster = undefined;
-      this.status = CONSTANTS.HERO_STATUS.WALKING;
-    }
-  }
-
-  taretMarkOnMouseClick(e) {
-    this.targetMonster.onMouseClick(e);
-  }
-
-  goToTarget(delta) {
-    // Reset attack timer.
-    this.nowAttackTiming = 0;
-
-    this.stepCounter += delta;
-    if (this.stepCounter >= 10) {
-      this.stepCounter -= 10;
-      this.nowStepFrame = this.nowStepFrame === 0 ? 1 : 0;
-    }
-
-    if (
-      goToTargetUtil(this, this.target, this.moveSpeed * delta) ||
-      this.targetMonster !== undefined
-    ) {
-      this.goToTargetMarkSprite.visible = false;
+  updateTargetMark(propStatus) {
+    if (propStatus.targetMonster !== undefined) {
+      this.animationStatus.setTargetMark(this.status.targetMonster.sprite, {
+        name: 'pointerdown',
+        listener: this.taretMarkOnMouseClick.bind(this),
+      });
     } else {
-      this.goToTargetMarkSprite.visible = true;
-    }
-
-    faceToTargetUtil(this, this.target);
-  }
-
-  attackMonster(delta) {
-    this.goToTargetMarkSprite.visible = false;
-    if (!this.targetMonster.alive) {
-      this.targetMonster = undefined;
-      this.target.x = this.x;
-      this.target.y = this.y;
-      return;
-    }
-    faceToTargetUtil(this, this.targetMonster);
-    this.nowAttackTiming += this.getAttackTimingDelta(delta);
-    if (this.nowAttackTiming < this.getAttackDuration() * 0.4) {
-      this.nowAttackFrame = 0;
-    } else if (this.nowAttackTiming < this.getAttackDuration() * 0.7) {
-      this.nowAttackFrame = 1;
-    } else {
-      if (this.nowAttackFrame <= 1) {
-        this.targetMonster.effects.push(
-          this.effectFactory.createEffect({
-            sender: this,
-            damage: this.batk + getRandomIntUtil(this.fatk),
-            aggro: true,
-            color: 0xdddddd,
-          })
-        );
-      }
-      this.nowAttackFrame = 2;
-    }
-    if (this.nowAttackTiming >= this.getAttackDuration()) {
-      this.nowAttackTiming -= this.getAttackDuration();
-      this.nowAttackFrame = 0;
+      this.animationStatus.hideTargetMark();
     }
   }
 
-  useSkill(delta) {
-    switch (this.usingSkill.targetType) {
-      case CONSTANTS.SKILL_TARGET_TYPE.SINGLE:
+  updateSprite() {
+    switch (this.action) {
+      case CONSTANTS.HERO_STATUS.SKILLING:
+        break;
+      case CONSTANTS.HERO_STATUS.ATTACKING:
+        this.animationStatus.updateAttackingSprite(this.status.dir);
+        break;
+      case CONSTANTS.HERO_STATUS.WALKING:
       default:
-        if (this.usingSkill.updateUse(delta, this, this.targetMonster)) {
-          this.usingSkill = undefined;
-        } else {
-          this.usingSkill.updateImage(this, this.targetMonster);
-        }
+        this.animationStatus.updateWalkingSprite(
+          this.status.x,
+          this.status.y,
+          this.status.dir
+        );
         break;
     }
   }
 
+  updateImage() {
+    this.updateSprite();
+    this.updateTargetMark(this.status);
+    this.animationStatus.updateSpriteZOrder();
+  }
+  /* EVENT */
+  onClickGround(args) {
+    if (this.action !== CONSTANTS.HERO_STATUS.SKILLING) {
+      this.status.usingSkill = undefined;
+      this.animationStatus.setMoveAnchorCoord(args.x, args.y);
+      this.status.targetMonster = undefined;
+      this.action = CONSTANTS.HERO_STATUS.WALKING;
+    }
+  }
+
+  taretMarkOnMouseClick(e) {
+    this.status.targetMonster.onMouseClick(e);
+  }
+  /* EFFECT */
+  /* TODO: move to private */
   calculateEffects() {
-    for (let i = 0; i < this.effects.length; i += 1) {
-      this.effects[i].onEffect(this);
-    }
-    this.effects = [];
+    this.effectStatus.forEach(effect => effect.onEffect(this.status));
   }
 
-  checkAlive() {
-    if (this.hp <= 0) {
-      this.alive = false;
-      this.sprite.texture = this.textures[`link_dead.png`];
-      this.sprite.x = this.x;
-      this.sprite.y = this.y;
-      this.sprite.anchor.set(0.5, 0.8);
-    }
+  /* TODO: move to private */
+  resetEffects() {
+    this.effectStatus = new HeroEffectStatus([
+      this.effectFactory.createEffect({
+        sender: this.status,
+        target: this.status,
+        mpRestore: this.status.mpgen,
+        popString: false,
+      }),
+    ]);
   }
 
-  updateTargetMark() {
-    if (this.targetMonster !== undefined) {
-      this.clickTargetMarkSprite.x = this.targetMonster.sprite.x;
-      this.clickTargetMarkSprite.y = this.targetMonster.sprite.y;
-      this.clickTargetMarkSprite.scale.x =
-        this.targetMonster.sprite.width / CONSTANTS.TARGET_MARK_PROP.WIDTH;
-      this.clickTargetMarkSprite.scale.y =
-        this.targetMonster.sprite.height /
-        CONSTANTS.TARGET_MARK_PROP.HEIGHT *
-        0.8;
-      this.clickTargetMarkSprite.on(
-        'pointerdown',
-        this.taretMarkOnMouseClick.bind(this)
-      );
-      this.clickTargetMarkSprite.visible = true;
-    } else {
-      this.clickTargetMarkSprite.visible = false;
-    }
-  }
-
-  update(delta) {
-    this.mp += this.mpgen * delta;
-    if (this.mp > this.maxMp) {
-      this.mp = this.maxMp;
-    }
-    this.calculateEffects();
-    this.checkAlive();
-    if (!this.alive) {
-      this.updateTargetMark();
-      return;
-    }
-
-    const skillsArray = Object.values(this.skillsSet);
-    skillsArray.forEach(sk => sk.update(delta));
-
-    let preUseSkillResult;
-    if (this.usingSkill !== undefined) {
-      switch (this.usingSkill.targetType) {
+  /* SKILL */
+  getPreUseSkillResult() {
+    if (this.status.usingSkill !== undefined) {
+      switch (this.status.usingSkill.targetType) {
         case CONSTANTS.SKILL_TARGET_TYPE.SINGLE:
         default:
-          preUseSkillResult = this.usingSkill.beforeUse(
-            this,
-            this.targetMonster
+          return this.status.usingSkill.beforeUse(
+            this.status,
+            this.status.targetMonster
           );
-          break;
       }
     }
-    if (this.status !== CONSTANTS.HERO_STATUS.SKILLING) {
+    return null;
+  }
+
+  setUsingSkill(preUseSkillResult) {
+    if (this.action !== CONSTANTS.HERO_STATUS.SKILLING) {
       switch (preUseSkillResult) {
         case CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOM:
           this.consoleLog.text = 'Out of mana.';
-          this.usingSkill = undefined;
+          this.status.usingSkill = undefined;
           break;
         case CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOR:
           this.consoleLog.text = 'Out of range.';
           break;
         case CONSTANTS.SKILL_CHECK_RESULT_TYPE.OOT:
           this.consoleLog.text = 'Out of target.';
-          this.usingSkill = undefined;
+          this.status.usingSkill = undefined;
           break;
         case CONSTANTS.SKILL_CHECK_RESULT_TYPE.IN_COOL:
           this.consoleLog.text = 'Skill in cooldown.';
-          this.usingSkill = undefined;
+          this.status.usingSkill = undefined;
           break;
         case CONSTANTS.SKILL_CHECK_RESULT_TYPE.SUCCESS:
           this.consoleLog.text = '';
@@ -263,115 +173,79 @@ export default class Hero {
           break;
       }
     }
+  }
 
+  /* ACTION */
+  /* TODO: move to private */
+  isAlive() {
+    if (this.status.hp <= 0) {
+      const nextStatus = new HeroStatus(this.status);
+      nextStatus.alive = false;
+      this.animationStatus.setDeadSprite(nextStatus.x, nextStatus.y);
+      this.updateTargetMark(nextStatus);
+      this.status = nextStatus;
+      return false;
+    }
+    return true;
+  }
+  getNextAction(preUseSkillResult) {
     if (
-      this.usingSkill !== undefined &&
-      (this.status === CONSTANTS.HERO_STATUS.SKILLING ||
+      this.status.usingSkill !== undefined &&
+      (this.action === CONSTANTS.HERO_STATUS.SKILLING ||
         preUseSkillResult === CONSTANTS.SKILL_CHECK_RESULT_TYPE.SUCCESS)
     ) {
-      this.status = CONSTANTS.HERO_STATUS.SKILLING;
-    } else if (this.targetMonster === undefined) {
+      return CONSTANTS.HERO_STATUS.SKILLING;
+    } else if (this.status.targetMonster === undefined) {
       // Check should attack or walk.
-      this.status = CONSTANTS.HERO_STATUS.WALKING;
+      return CONSTANTS.HERO_STATUS.WALKING;
     } else if (
-      this.targetMonster !== undefined &&
-      getDistUtil(this, this.targetMonster) > this.attackRange
+      this.status.targetMonster !== undefined &&
+      getDistUtil(this.status, this.status.targetMonster) >
+        this.status.attackRange
     ) {
-      this.status = CONSTANTS.HERO_STATUS.WALKING;
-      this.target.x = this.targetMonster.x;
-      this.target.y = this.targetMonster.y;
-    } else {
-      this.status = CONSTANTS.HERO_STATUS.ATTACKING;
+      this.animationStatus.setMoveAnchorCoord(
+        this.status.targetMonster.x,
+        this.status.targetMonster.y
+      );
+      return CONSTANTS.HERO_STATUS.WALKING;
+    }
+    return CONSTANTS.HERO_STATUS.ATTACKING;
+  }
+
+  update(delta) {
+    this.calculateEffects();
+    this.resetEffects();
+
+    if (!this.isAlive()) {
+      return;
     }
 
-    switch (this.status) {
-      case CONSTANTS.HERO_STATUS.SKILLING:
-        this.useSkill(delta);
-        return;
-      case CONSTANTS.HERO_STATUS.ATTACKING:
-        this.attackMonster(delta);
-        break;
-      case CONSTANTS.HERO_STATUS.WALKING:
-      default:
-        this.goToTarget(delta);
-    }
+    Object.values(this.skillStatus.getSkills()).forEach(sk => sk.update(delta));
+
+    const preUseSkillResult = this.getPreUseSkillResult();
+    this.setUsingSkill(preUseSkillResult);
+    this.action = this.getNextAction(preUseSkillResult);
+    this.status = HeroAction.updateStatus({
+      action: this.action,
+      status: this.status,
+      animationStatus: this.animationStatus,
+      delta,
+      effectFactory: this.effectFactory,
+    });
     this.updateImage();
   }
 
-  updateImage() {
-    switch (this.status) {
-      case CONSTANTS.HERO_STATUS.SKILLING:
-        break;
-      case CONSTANTS.HERO_STATUS.ATTACKING: {
-        this.sprite.texture = this.textures[
-          `link_attack_${this.dir}_${this.nowAttackFrame}.png`
-        ];
-
-        // TODO: make this cleaner
-        if (this.nowAttackFrame === 0) {
-          this.sprite.anchor.set(0.5, 0.8);
-          // this.sprite.x = this.x;
-          // this.sprite.y = this.y;
-        } else if (this.dir === CONSTANTS.DIRECTION.DOWN) {
-          this.sprite.anchor.set(0.5, 0.4);
-          // this.sprite.x = this.x;
-          // this.sprite.y = this.y + this.sprite.height / 4;
-        } else if (this.dir === CONSTANTS.DIRECTION.LEFT) {
-          this.sprite.anchor.set(0.75, 0.8);
-          // this.sprite.x = this.x - this.sprite.width / 4;
-          // this.sprite.y = this.y;
-        } else if (this.dir === CONSTANTS.DIRECTION.UP) {
-          this.sprite.anchor.set(0.5, 0.9);
-          // this.sprite.x = this.x;
-          // this.sprite.y = this.y - this.sprite.height / 4 ;
-        } else if (this.dir === CONSTANTS.DIRECTION.RIGHT) {
-          this.sprite.anchor.set(0.25, 0.8);
-          // this.sprite.x = this.x + this.sprite.width / 4;
-          // this.sprite.y = this.y;
-        }
-        break;
-      }
-      case CONSTANTS.HERO_STATUS.WALKING:
-      default:
-        this.sprite.texture = this.textures[
-          `link_face_${this.dir}_${this.nowStepFrame}.png`
-        ];
-        this.sprite.anchor.set(0.5, 0.8);
-        this.sprite.x = this.x;
-        this.sprite.y = this.y;
-        this.goToTargetMarkSprite.x = this.target.x;
-        this.goToTargetMarkSprite.y = this.target.y;
-        break;
-    }
-    this.updateTargetMark();
-
-    this.sprite.zOrder = -this.sprite.y - this.sprite.height / 2;
-  }
-
-  getAttackDuration() {
-    return this.attackDuration;
-  }
-  getAttackTimingDelta(delta) {
-    return this.atkSpeedAmp * delta;
-  }
-
+  /* ITEM */
   getItem(item) {
-    if (!(item.NAME in this.itemsList)) {
-      this.itemsList[item.NAME] = item.GET_OBJ({
-        effectFactory: this.effectFactory,
-      });
-      this.itemsList[item.NAME].setOwner(this);
+    if (!this.itemStatus.hasItem(item.name)) {
+      this.itemStatus.addItem(item, this, this.effectFactory);
     }
-    this.itemsList[item.NAME].charge(1);
     this.statusDashboard.updateItemsCallBack();
   }
 
-  consumeItem(itemName) {
-    if (itemName in this.itemsList) {
-      this.itemsList[itemName].consume(1);
-      if (this.itemsList[itemName].capacity <= 0) {
-        delete this.itemsList[itemName];
-      }
+  consumeItem(itemName, effect) {
+    if (this.itemStatus.consume(itemName)) {
+      this.effectStatus.push(effect);
     }
     this.statusDashboard.updateItemsCallBack();
   }

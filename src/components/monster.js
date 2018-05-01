@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { getRandomIntUtil } from '../utils';
 import Drop from './drop';
+import CONSTANTS from '../constants';
 
 export default class Monster {
   constructor(args) {
@@ -25,7 +26,7 @@ export default class Monster {
     this.y = args.y;
     this.target = { x: this.x, y: this.y };
     this.dir = args.dir;
-    this.hero = args.hero;
+    // this.hero = args.hero;
     this.monsterName = '';
     this.maxHp = 1;
     this.armor = 0;
@@ -38,6 +39,14 @@ export default class Monster {
 
     // Effects
     this.effectFactory = args.effectFactory;
+    this.target = args.target;
+  }
+
+  getTargetStatus(type) {
+    if (this.target) {
+      return this.target.getStatus(type);
+    }
+    return null;
   }
 
   destructor() {
@@ -47,7 +56,7 @@ export default class Monster {
 
   onMouseClick(e) {
     e.stopPropagation();
-    this.hero.targetMonster = this;
+    this.getTargetStatus(CONSTANTS.STATUS_TYPE.PROP).targetMonster = this;
   }
 
   calculateEffects() {
@@ -79,7 +88,7 @@ export default class Monster {
             item: drop.item,
             x: this.x + dx,
             y: this.y + dy,
-            hero: this.hero,
+            hero: this.target,
           })
         );
       }

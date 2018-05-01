@@ -119,7 +119,7 @@ function gameLoop(delta) {
         x: 50 + getRandomIntUtil(700),
         y: 50 + getRandomIntUtil(400),
         dir: CONSTANTS.DIRECTION.DOWN,
-        hero,
+        target: hero,
         dropToBattleGroudCallBack,
         effectFactory,
       })
