@@ -24,6 +24,11 @@ export default class HeroStatus extends Status {
       // Skill
       this.usingSkill = undefined;
       //
+      this.targetMonster = undefined;
     }
+  }
+
+  setTarget(target) {
+    this.targetMonster = target;
   }
 }

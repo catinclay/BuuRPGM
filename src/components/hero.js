@@ -62,8 +62,11 @@ export default class Hero {
         return this.status;
     }
   }
+  /* SETTER */
+  setTarget(target) {
+    this.status.setTarget(target);
+  }
   /* ANIMATION */
-
   addToContainer(container) {
     this.animationStatus.appendToContainer(container);
   }
@@ -237,9 +240,7 @@ export default class Hero {
 
   /* ITEM */
   getItem(item) {
-    if (!this.itemStatus.hasItem(item.name)) {
-      this.itemStatus.addItem(item, this, this.effectFactory);
-    }
+    this.itemStatus.addItem(item, this, this.effectFactory);
     this.statusDashboard.updateItemsCallBack();
   }
 

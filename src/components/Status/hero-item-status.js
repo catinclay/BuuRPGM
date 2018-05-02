@@ -17,10 +17,12 @@ export default class HeroItemStatus extends Status {
   addItem(item, owner, effectFactory) {
     // need to make item an instance of Item
     // if(item instanceof Item){
-    this[items][item.NAME] = item.GET_OBJ({
-      effectFactory,
-    });
-    this[items][item.NAME].setOwner(owner);
+    if (!this.hasItem(item.NAME)) {
+      this[items][item.NAME] = item.GET_OBJ({
+        effectFactory,
+      });
+      this[items][item.NAME].setOwner(owner);
+    }
     this[items][item.NAME].charge(1);
     // }
   }
